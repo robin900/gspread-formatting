@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from gspread.utils import a1_to_rowcol, rowcol_to_a1
+from gspread.utils import a1_to_rowcol, rowcol_to_a1, finditem
 from gspread.models import Spreadsheet
 from gspread.urls import SPREADSHEET_URL
 
@@ -80,6 +80,42 @@ def get_user_entered_format(worksheet, label):
     props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('userEnteredFormat')
     return CellFormat.from_props(props) if props else None
 
+def get_frozen_row_count(worksheet):
+    md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
+    sheet_data = finditem(lambda i: i['properties']['title'] == worksheet.title, md['sheets'])
+    grid_props = sheet_data['properties']['gridProperties']
+    return grid_props.get('frozenRowCount')
+
+def get_frozen_column_count(worksheet):
+    md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
+    sheet_data = finditem(lambda i: i['properties']['title'] == worksheet.title, md['sheets'])
+    grid_props = sheet_data['properties']['gridProperties']
+    return grid_props.get('frozenColumnCount')
+
+def set_frozen(worksheet, rows=None, cols=None):
+    if rows is None and cols is None:
+        raise ValueError("Must specify at least one of rows and cols")
+    grid_properties = {}
+    if rows is not None:
+        grid_properties['frozenRowCount'] = rows
+    if cols is not None:
+        grid_properties['frozenColumnCount'] = cols
+    fields = ','.join(
+        'gridProperties.%s' % p for p in grid_properties.keys()
+    )
+    body = {
+        'requests': [{
+            'updateSheetProperties': {
+                'properties': {
+                    'sheetId': worksheet.id,
+                    'gridProperties': grid_properties
+                },
+                'fields': fields
+            }
+        }]
+    }
+    return worksheet.spreadsheet.batch_update(body)
+
 # monkey-patch Spreadsheet class
 
 def fetch_sheet_metadata(self, params=None):
@@ -94,11 +130,11 @@ del fetch_sheet_metadata
 
 # internal functions
 
-def _fetch_with_updated_properties(spreadsheet, key):
+def _fetch_with_updated_properties(spreadsheet, key, params=None):
     try:
         return spreadsheet._properties[key]
     except KeyError:
-        metadata = spreadsheet.fetch_sheet_metadata()
+        metadata = spreadsheet.fetch_sheet_metadata(params)
         spreadsheet._properties.update(metadata['properties'])
         return spreadsheet._properties[key]
 

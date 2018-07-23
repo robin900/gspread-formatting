@@ -2,7 +2,8 @@ gspread-formatting
 ------------------
 
 This package provides complete support of basic cell formatting for Google spreadsheets
-to the popular ``gspread`` package.
+to the popular ``gspread`` package, along with a few related features such as setting
+"frozen" rows and columns in a worksheet.
 
 Basic formatting of a range of cells in a worksheet is offered by the ``format_cell_range`` function . 
 All basic formatting components of the v4 Sheets API's ``CellFormat`` are present as classes 
@@ -44,6 +45,14 @@ operators ``-`` (for difference) and ``&`` (for intersection).::
 The spreadsheet's own default format, as a CellFormat object, is available via ``get_default_format(spreadsheet)``.
 ``get_effective_format(worksheet, label)`` and ``get_user_entered_format(worksheet, label)`` also will return
 for any provided cell label either a CellFormat object (if any formatting is present) or None.
+
+The following functions get or set "frozen" row or column counts for a worksheet::
+
+    get_frozen_row_count(worksheet)
+    get_frozen_column_count(worksheet)
+    set_frozen(worksheet, rows=1)
+    set_frozen(worksheet, cols=1)
+    set_frozen(worksheet, rows=1, cols=0)
 
 Installation
 ------------
