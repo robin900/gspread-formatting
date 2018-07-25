@@ -115,11 +115,17 @@ class WorksheetTest(GspreadTest):
         self.sheet.update_cells(cell_list)
 
         fmt = cellFormat(textFormat=textFormat(bold=True))
-        format_cell_range(self.sheet, 'A1:D6', fmt)
+        format_cell_ranges(self.sheet, [('A1:B6', fmt), ('C1:D6', fmt)])
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
         self.assertEqual(ue_fmt.textFormat.bold, True)
         eff_fmt = get_effective_format(self.sheet, 'A1')
         self.assertEqual(eff_fmt.textFormat.bold, True)
+        fmt2 = cellFormat(textFormat=textFormat(italic=True))
+        format_cell_range(self.sheet, 'A1:D6', fmt2)
+        ue_fmt = get_user_entered_format(self.sheet, 'A1')
+        self.assertEqual(ue_fmt.textFormat.italic, True)
+        eff_fmt = get_effective_format(self.sheet, 'A1')
+        self.assertEqual(eff_fmt.textFormat.italic, True)
 
     def test_frozen_rows_cols(self):
         set_frozen(self.sheet, rows=1, cols=1)

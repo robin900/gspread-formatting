@@ -5,26 +5,35 @@ from gspread.utils import a1_to_rowcol, rowcol_to_a1, finditem
 from gspread.models import Spreadsheet
 from gspread.urls import SPREADSHEET_URL
 
-def format_cell_range(worksheet, name, cell_format):
-    """Update a range of :class:`Cell` objects in the given Worksheet 
-    to have the specified cell formatting.
+def format_cell_ranges(worksheet, ranges):
+    """Update a list of Cell object ranges of :class:`Cell` objects 
+    in the given ``Worksheet`` to have the accompanying ``CellFormat``.
 
-    :param worksheet: The Worksheet object.
-    :param name: A string with range value in A1 notation, e.g. 'A1:A5'.
-    :param cell_format: A CellFormat object.
+    :param worksheet: The ``Worksheet`` object.
+    :param ranges: An iterable whose elements are pairs of: 
+        a string with range value in A1 notation, e.g. 'A1:A5', 
+        and a ``CellFormat`` object).
     """
 
     body = {
-        'requests': [{
-            'repeatCell': {
-                'range': _range_to_gridrange_object(name, worksheet.id),
-                'cell': { 'userEnteredFormat': cell_format.to_props() },
-                'fields': ",".join(cell_format.affected_fields('userEnteredFormat'))
-            }
-        }]
+        'requests': [ 
+            _build_repeat_cell_request(worksheet, range, cell_format) 
+            for range, cell_format in ranges
+        ]
     }
 
     return worksheet.spreadsheet.batch_update(body)
+
+def format_cell_range(worksheet, name, cell_format):
+    """Update a range of :class:`Cell` objects in the given Worksheet 
+    to have the specified ``CellFormat``.
+
+    :param worksheet: The ``Worksheet`` object.
+    :param name: A string with range value in A1 notation, e.g. 'A1:A5'.
+    :param cell_format: A ``CellFormat`` object.
+    """
+
+    return format_cell_ranges(worksheet, [(name, cell_format)])
 
 def get_default_format(spreadsheet):
     """Return Default CellFormat for spreadsheet, or None if no default formatting was specified."""
@@ -130,6 +139,15 @@ del fetch_sheet_metadata
 
 # internal functions
 
+def _build_repeat_cell_request(worksheet, range, cell_format):
+    return {
+        'repeatCell': {
+            'range': _range_to_gridrange_object(range, worksheet.id),
+            'cell': { 'userEnteredFormat': cell_format.to_props() },
+            'fields': ",".join(cell_format.affected_fields('userEnteredFormat'))
+        }
+    }
+    
 def _fetch_with_updated_properties(spreadsheet, key, params=None):
     try:
         return spreadsheet._properties[key]

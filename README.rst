@@ -5,7 +5,7 @@ This package provides complete support of basic cell formatting for Google sprea
 to the popular ``gspread`` package, along with a few related features such as setting
 "frozen" rows and columns in a worksheet.
 
-Basic formatting of a range of cells in a worksheet is offered by the ``format_cell_range`` function . 
+Basic formatting of a range of cells in a worksheet is offered by the ``format_cell_range`` function. 
 All basic formatting components of the v4 Sheets API's ``CellFormat`` are present as classes 
 in the ``gspread_formatting`` module, available both by ``InitialCaps`` names and ``camelCase`` names: 
 for example, the background color class is ``BackgroundColor`` but is also available as 
@@ -16,15 +16,31 @@ naming, e.g. ``backgroundColor=...``. Complex formats may be composed easily, by
 See `the CellFormat page of the Sheets API documentation <https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#CellFormat>`_
 to learn more about each formatting component.::
 
-        from gspread_formatting import *
+    from gspread_formatting import *
 
-        fmt = cellFormat(
-            backgroundColor=color(1, 0.9, 0.9),
-            textFormat=textFormat(bold=True, foregroundColor=color(1, 0, 1)),
-            horizontalAlignment='CENTER'
-            )
+    fmt = cellFormat(
+        backgroundColor=color(1, 0.9, 0.9),
+        textFormat=textFormat(bold=True, foregroundColor=color(1, 0, 1)),
+        horizontalAlignment='CENTER'
+        )
 
-        format_cell_range(worksheet, 'A1:J1', fmt)
+    format_cell_range(worksheet, 'A1:J1', fmt)
+
+The ``format_cell_ranges`` function allows for formatting multiple ranges with corresponding formats,
+all in one function call and Sheets API operation::
+
+    fmt = cellFormat(
+        backgroundColor=color(1, 0.9, 0.9),
+        textFormat=textFormat(bold=True, foregroundColor=color(1, 0, 1)),
+        horizontalAlignment='CENTER'
+        )
+
+    fmt2 = cellFormat(
+        backgroundColor=color(0.9, 0.9, 0.9),
+        horizontalAlignment='RIGHT'
+        )
+
+    format_cell_ranges(worksheet, [('A1:J1', fmt), ('K1:K200', fmt2)])
 
 ``CellFormat`` objects are comparable with ``==`` and ``!=``, and are mutable at all times; 
 they can be safely copied with ``copy.deepcopy``. ``CellFormat`` objects can be combined
@@ -32,15 +48,15 @@ into a new ``CellFormat`` object using the ``add`` method (or ``+`` operator). `
 ``difference`` and ``intersection`` methods, as well as the corresponding
 operators ``-`` (for difference) and ``&`` (for intersection).::
 
-        >>> default_format = CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True))
-        >>> user_format = CellFormat(textFormat=textFormat(italic=True))
-        >>> effective_format = default_format + user_format
-        >>> effective_format
-        CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True, italic=True))
-        >>> effective_format - user_format 
-        CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True))
-        >>> effective_format - user_format == default_format
-        True
+    >>> default_format = CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True))
+    >>> user_format = CellFormat(textFormat=textFormat(italic=True))
+    >>> effective_format = default_format + user_format
+    >>> effective_format
+    CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True, italic=True))
+    >>> effective_format - user_format 
+    CellFormat(backgroundColor=color(1,1,1), textFormat=textFormat(bold=True))
+    >>> effective_format - user_format == default_format
+    True
 
 The spreadsheet's own default format, as a CellFormat object, is available via ``get_default_format(spreadsheet)``.
 ``get_effective_format(worksheet, label)`` and ``get_user_entered_format(worksheet, label)`` also will return
