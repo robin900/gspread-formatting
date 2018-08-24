@@ -98,3 +98,15 @@ From GitHub
     cd gspread-formatting
     python setup.py install
 
+Development and Testing
+-----------------------
+
+Install packages listed in ``requirements-dev.txt``. To run the test suite
+in ``test.py`` you will need to:
+
+* Authorize as the Google account you wish to use as a test, and download
+  a JSON file containing the credentials. Name the file ``creds.json``
+  and locate it in the top-level folder of the repository.
+* Set up a ``tests.config`` file using the ``tests.config.example`` file as a template.
+  Specify the title of a spreadsheet that the Google account you are using
+  can access with write privileges.

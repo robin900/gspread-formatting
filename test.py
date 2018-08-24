@@ -100,6 +100,9 @@ class WorksheetTest(GspreadTest):
     def tearDown(self):
         self.spreadsheet.del_worksheet(self.sheet)
 
+    def test_some_format_constructors(self):
+        f = numberFormat('TEXT', '###0')
+        f = border('DOTTED', color(0.2, 0.2, 0.2))
     def test_format_range(self):
         rows = [["", "", "", ""],
                 ["", "", "", ""],

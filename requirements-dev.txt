@@ -3,3 +3,4 @@ Sphinx
 Sphinx-PyPI-upload3
 twine
 nose
+oauth2client

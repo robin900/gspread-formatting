@@ -23,7 +23,7 @@ setup(
     name='gspread-formatting',
     version=VERSION,
     py_modules=['gspread_formatting'],
-    test_suite='tests',
+    test_suite='test',
     install_requires=[
         'gspread>=3.0.0' 
         ],
