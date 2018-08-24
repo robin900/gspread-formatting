@@ -342,8 +342,8 @@ class NumberFormat(CellFormatComponent):
     TYPES = set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])
 
     def __init__(self, type, pattern=None):
-        if type.upper() not in TYPES:
-            raise ValueError("NumberFormat.type must be one of: %s" % TYPES)
+        if type.upper() not in NumberFormat.TYPES:
+            raise ValueError("NumberFormat.type must be one of: %s" % NumberFormat.TYPES)
         self.type = type.upper()
         self.pattern = pattern
 
@@ -371,8 +371,8 @@ class Border(CellFormatComponent):
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
     def __init__(self, style, color):
-        if style.upper() not in STYLES:
-            raise ValueError("Border.style must be one of: %s" % STYLES)
+        if style.upper() not in Border.STYLES:
+            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
         self.style = style.upper()
         self.color = color
 
