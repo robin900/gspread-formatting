@@ -152,3 +152,29 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(effective_format.intersection(effective_format), effective_format)
         self.assertEqual(effective_format & effective_format, effective_format)
         self.assertEqual(effective_format - effective_format, None)
+
+    def test_date_formatting_roundtrip(self):
+        rows = [
+            ["9/1/2018", "1/2/2017", "4/4/2014", "4/4/2019"],
+            ["10/2/2019", "2/4/2000", "5/5/1994", "7/7/1979"]
+        ]
+        def_fmt = get_default_format(self.spreadsheet)
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+        fmt = cellFormat(
+                numberFormat=numberFormat('DATE', ' DD MM YYYY'),
+                backgroundColor=color(0.8, 0.9, 1),
+                horizontalAlignment='RIGHT',
+                textFormat=textFormat(bold=False))
+        format_cell_range(self.sheet, 'A1:D2', fmt)
+        ue_fmt = get_user_entered_format(self.sheet, 'A1')
+        self.assertEqual(ue_fmt.numberFormat.type, 'DATE')
+        self.assertEqual(ue_fmt.numberFormat.pattern, ' DD MM YYYY')
+        eff_fmt = get_effective_format(self.sheet, 'A1')
+        self.assertEqual(eff_fmt.numberFormat.type, 'DATE')
+        self.assertEqual(eff_fmt.numberFormat.pattern, ' DD MM YYYY')
+        dt = self.sheet.acell('A1').value
+        self.assertEqual(dt, ' 01 09 2018')
+
