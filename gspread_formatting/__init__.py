@@ -50,9 +50,9 @@ def get_effective_format(worksheet, label):
                   Letter case is ignored.
     Example:
 
-    >>> get_user_entered_format(worksheet, 'A1')
+    >>> get_effective_format(worksheet, 'A1')
     <CellFormat textFormat=(bold=True)>
-    >>> get_user_entered_format(worksheet, 'A2')
+    >>> get_effective_format(worksheet, 'A2')
     None
     """
     label = '%s!%s' % (worksheet.title, rowcol_to_a1(*a1_to_rowcol(label)))

@@ -6,6 +6,9 @@ import random
 import unittest
 import itertools
 import uuid
+from datetime import datetime, date
+import pandas as pd
+from gspread_dataframe import set_with_dataframe
 
 try:
     import ConfigParser
@@ -17,6 +20,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 from gspread import utils
 from gspread_formatting import *
+from gspread_formatting.dataframe import *
 
 try:
     unicode
@@ -77,8 +81,8 @@ class WorksheetTest(GspreadTest):
     @classmethod
     def setUpClass(cls):
         super(WorksheetTest, cls).setUpClass()
-        title = cls.config.get('Spreadsheet', 'title')
-        cls.spreadsheet = cls.gc.open(title)
+        ss_id = cls.config.get('Spreadsheet', 'id')
+        cls.spreadsheet = cls.gc.open_by_key(ss_id)
         try:
             test_sheet = cls.spreadsheet.worksheet('wksht_test')
             if test_sheet:
@@ -103,6 +107,7 @@ class WorksheetTest(GspreadTest):
     def test_some_format_constructors(self):
         f = numberFormat('TEXT', '###0')
         f = border('DOTTED', color(0.2, 0.2, 0.2))
+
     def test_format_range(self):
         rows = [["", "", "", ""],
                 ["", "", "", ""],
@@ -177,4 +182,77 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_fmt.numberFormat.pattern, ' DD MM YYYY')
         dt = self.sheet.acell('A1').value
         self.assertEqual(dt, ' 01 09 2018')
+
+    def test_dataframe_formatter(self):
+        rows = [  
+            {
+                'A': 'Label ' + str(i), 
+                'B': i * 100 + 2.34, 
+                'C': date(2019, 3, i % 31 + 1), 
+                'D': datetime(2019, 3, i % 31 + 1, i % 24, i % 60, i % 60),
+                'E': i * 1000 + 7.8001, 
+            } 
+            for i in range(200) 
+        ]
+        df = pd.DataFrame.from_records(rows)
+        set_with_dataframe(self.sheet, df, include_index=True)
+        format_with_dataframe(
+            self.sheet, 
+            df, 
+            formatter=BasicFormatter.with_defaults(
+                freeze_headers=True, 
+                column_formats={
+                    'C': cellFormat(
+                            numberFormat=numberFormat(type='DATE', pattern='yyyy mmmmmm dd'), 
+                            horizontalAlignment='CENTER'
+                        ),
+                    'E': cellFormat(
+                            numberFormat=numberFormat(type='NUMBER', pattern='[Color23][>40000]"HIGH";[Color43][<=10000]"LOW";0000'), 
+                            horizontalAlignment='CENTER'
+                        )
+                }
+            ), 
+            include_index=True,
+        )
+        for cell_range, expected_uef in [
+            ('A1:A201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
+            ('B1:B201', cellFormat(horizontalAlignment='CENTER')), 
+            ('C1:C201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
+            ('D1:D201', 
+                cellFormat(
+                    numberFormat=numberFormat(type='DATE', pattern='yyyy mmmmmm dd'), 
+                    horizontalAlignment='CENTER'
+                )
+            ), 
+            ('E1:E201', cellFormat(numberFormat=numberFormat(type='DATE'), horizontalAlignment='CENTER')), 
+            ('F1:F201', 
+                cellFormat(
+                    numberFormat=numberFormat(
+                        type='NUMBER', 
+                        pattern='[Color23][>40000]"HIGH";[Color43][<=10000]"LOW";0000'
+                    ), 
+                    horizontalAlignment='CENTER'
+                )
+            ), 
+            ('A1:A201', 
+                cellFormat(
+                    backgroundColor=DEFAULT_HEADER_BACKGROUND_COLOR,
+                    textFormat=textFormat(bold=True)
+                )
+            ), 
+            ('A1:F1', 
+                cellFormat(
+                    backgroundColor=DEFAULT_HEADER_BACKGROUND_COLOR,
+                    textFormat=textFormat(bold=True)
+                )
+            )
+            ]:
+            start_cell, end_cell = cell_range.split(':')
+            for cell in (start_cell, end_cell):
+                actual_uef = get_user_entered_format(self.sheet, cell)
+                # actual_uef must be a superset of expected_uef
+                self.assertTrue(actual_uef & expected_uef == expected_uef)
+        self.assertEqual(1, get_frozen_row_count(self.sheet))
+        self.assertEqual(1, get_frozen_column_count(self.sheet))
+
 
