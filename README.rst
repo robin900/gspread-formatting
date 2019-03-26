@@ -8,6 +8,12 @@ This package provides complete support of basic cell formatting for Google sprea
 to the popular ``gspread`` package, along with a few related features such as setting
 "frozen" rows and columns in a worksheet.
 
+The package also offers graceful formatting of Google spreadsheets using a Pandas DataFrame.
+See the section below for usage and details.
+
+Usage
+~~~~~
+
 Basic formatting of a range of cells in a worksheet is offered by the ``format_cell_range`` function. 
 All basic formatting components of the v4 Sheets API's ``CellFormat`` are present as classes 
 in the ``gspread_formatting`` module, available both by ``InitialCaps`` names and ``camelCase`` names: 
@@ -45,8 +51,15 @@ all in one function call and Sheets API operation::
 
     format_cell_ranges(worksheet, [('A1:J1', fmt), ('K1:K200', fmt2)])
 
+Retrieving, Comparing, and Composing CellFormats
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A Google spreadsheet's own default format, as a CellFormat object, is available via ``get_default_format(spreadsheet)``.
+``get_effective_format(worksheet, label)`` and ``get_user_entered_format(worksheet, label)`` also will return
+for any provided cell label either a CellFormat object (if any formatting is present) or None.
+
 ``CellFormat`` objects are comparable with ``==`` and ``!=``, and are mutable at all times; 
-they can be safely copied with ``copy.deepcopy``. ``CellFormat`` objects can be combined
+they can be safely copied with Python's ``copy.deepcopy`` function. ``CellFormat`` objects can be combined
 into a new ``CellFormat`` object using the ``add`` method (or ``+`` operator). ``CellFormat`` objects also offer 
 ``difference`` and ``intersection`` methods, as well as the corresponding
 operators ``-`` (for difference) and ``&`` (for intersection).::
@@ -61,9 +74,8 @@ operators ``-`` (for difference) and ``&`` (for intersection).::
     >>> effective_format - user_format == default_format
     True
 
-The spreadsheet's own default format, as a CellFormat object, is available via ``get_default_format(spreadsheet)``.
-``get_effective_format(worksheet, label)`` and ``get_user_entered_format(worksheet, label)`` also will return
-for any provided cell label either a CellFormat object (if any formatting is present) or None.
+Frozen Rows and Columns
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The following functions get or set "frozen" row or column counts for a worksheet::
 
@@ -72,6 +84,29 @@ The following functions get or set "frozen" row or column counts for a worksheet
     set_frozen(worksheet, rows=1)
     set_frozen(worksheet, cols=1)
     set_frozen(worksheet, rows=1, cols=0)
+
+Formatting a Worksheet Using a Pandas DataFrame
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using Pandas DataFrames to provide data to a Google spreadsheet -- using perhaps
+the ``gspread-dataframe`` package `available on PyPI <https://pypi.org/project/gspread-dataframe/>`_ --
+the ``format_with_dataframe`` function in ``gspread_formatting.dataframe`` allows you to use that same 
+DataFrame object and specify formatting for a worksheet. There is a ``DEFAULT_FORMATTER`` in the module,
+which will be used if no formatter object is provided to ``format_with_dataframe``::
+
+    from gspread_formatting.dataframe import format_with_dataframe, BasicFormatter
+    from gspread_formatting import Color
+
+    # uses DEFAULT_FORMATTER
+    format_with_dataframe(worksheet, dataframe, include_index=True, include_column_header=True)
+
+    formatter = BasicFormatter(
+        header_background_color=Color(0,0,0), 
+        header_text_color=Color(1,1,1),
+        decimal_format='#,##0.00'
+    )
+
+    format_with_dataframe(worksheet, dataframe, formatter, include_index=False, include_column_header=True)
 
 Installation
 ------------
@@ -108,5 +143,5 @@ in ``test.py`` you will need to:
   a JSON file containing the credentials. Name the file ``creds.json``
   and locate it in the top-level folder of the repository.
 * Set up a ``tests.config`` file using the ``tests.config.example`` file as a template.
-  Specify the title of a spreadsheet that the Google account you are using
+  Specify the ID of a spreadsheet that the Google account you are using
   can access with write privileges.
