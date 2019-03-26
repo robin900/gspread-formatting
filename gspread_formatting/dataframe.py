@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import six
-from datetime import datetime, date
-
 try:
     from itertools import zip_longest
 except ImportError:
@@ -23,30 +20,36 @@ DEFAULT_HEADER_BACKGROUND_COLOR = Color(0.8980392, 0.8980392, 0.8980392)
 
 def format_with_dataframe(worksheet,
                           dataframe,
-                          formatter,
+                          formatter=None,
                           row=1,
                           col=1,
                           include_index=False,
                           include_column_header=True):
     """
-    Sets the values of a given DataFrame, anchoring its upper-left corner
-    at (row, col). (Default is row 1, column 1.)
+    Modifies the cell formatting of an area of the provided Worksheet, using
+    the provided DataFrame to determine the area to be formatted and the formats
+    to be used.
 
     :param worksheet: the gspread worksheet to set with content of DataFrame.
     :param dataframe: the DataFrame.
-    :param include_index: if True, include the DataFrame's index as an
-            additional column. Defaults to False.
-    :param include_column_header: if True, add a header row before data with
-            column names. (If include_index is True, the index's name will be
-            used as its column's header.) Defaults to True.
-    :param formatter: an optional instance of WorksheetFormatter, which
+    :param formatter: an optional instance of ``DataFrameFormatter`` class, which
                       will examine the contents of the DataFrame and
-                      assemble a set of `gspread_formatter` operations
+                      assemble a set of ``gspread_formatter`` operations
                       to be performed after the DataFrame contents 
                       are written to the given Worksheet. The formatting
                       operations are performed after the contents are written
-                      and before this function returns.
+                      and before this function returns. Defaults to 
+                      ``DEFAULT_FORMATTER``.
+    :param row: number of row at which to begin formatting. Defaults to 1.
+    :param col: number of column at which to begin formatting. Defaults to 1.
+    :param include_index: if True, include the DataFrame's index as an
+            additional column when performing formatting. Defaults to False.
+    :param include_column_header: if True, format a header row before data.
+            Defaults to True.
     """
+    if not formatter:
+        formatter = DEFAULT_FORMATTER
+
     formatting_ranges = []
 
     columns = [ dataframe[c] for c in dataframe.columns ]
@@ -112,7 +115,7 @@ def format_with_dataframe(worksheet,
             cell_fmt = formatter.format_for_cell(cell_value, y_idx+row, x_idx+col, dataframe)
             if cell_fmt:
                 formatting_ranges.append((rowcol_to_a1(y_idx+row, x_idx+col), cell_fmt))
-        row_fmt = formatter.format_for_row(values, y_idx+row, dataframe)
+        row_fmt = formatter.format_for_data_row(values, y_idx+row, dataframe)
         if row_fmt:
             formatting_ranges.append(
                 (
@@ -131,9 +134,18 @@ def format_with_dataframe(worksheet,
     if freeze_args:
         set_frozen(worksheet, **freeze_args)
 
-class DataFrameFormatter():
+class DataFrameFormatter(object):
+    """
+    An abstract base class defining the interface for producing formats
+    for a worksheet based on a given DataFrame.
+    """
     @classmethod
     def resolve_number_format(cls, value, type=None):
+        """
+        A utility class method that resolves a value to a ``NumberFormat`` object,
+        whether that value is a ``NumberFormat`` object or a pattern string.
+        Optional ``type`` parameter is to specify ``NumberFormat`` enum value.
+        """
         if value is None:
             return None
         elif isinstance(value, numberFormat):
@@ -144,6 +156,10 @@ class DataFrameFormatter():
             raise ValueError(value)
 
     def format_with_dataframe(self, worksheet, dataframe, row=1, col=1, include_index=False, include_column_header=True):
+        """
+        Convenience method that will call this module's ``format_with_dataframe`` function with
+        this ``DataFrameFormatter`` object as the formatter.
+        """
         return format_with_dataframe(
             worksheet, 
             dataframe, 
@@ -155,21 +171,80 @@ class DataFrameFormatter():
         )
 
     def format_for_header(self, series, dataframe):
+        """
+        Called by ``format_with_dataframe`` once for each header row (if ``include_column_header``
+        parameter is ``True``) or column (if ``include_index`` parameter is also ``True``)..
+
+        :param series: A sequence of elements representing the values in the row or column.
+                 Can be a simple list, or a ``pandas.Series`` or ``pandas.Index`` object.
+        :param dataframe: The ``pandas.DataFrame`` object, as additional context.
+
+        :return: Either a ``CellFormat`` object or ``None``.
+        """
         raise NotImplementedError()
 
     def format_for_column(self, column, col_number, dataframe):
+        """
+        Called by ``format_with_dataframe`` once for each column in the dataframe.
+
+        :param column: A ``pandas.Series`` object representing the column.
+        :param col_number: The index (starting with 1) of the column in the worksheet.
+        :param dataframe: The ``pandas.DataFrame`` object, as additional context.
+
+        :return: Either a ``CellFormat`` object or ``None``.
+        """
         raise NotImplementedError()
 
-    def format_for_cell(self, values, row_number, col_number, dataframe):
+    def format_for_data_row(self, values, row_number, dataframe):
+        """
+        Called by ``format_with_dataframe`` once for each data row in the dataframe.
+        Allows for row-specific additional formatting to complement any
+        column-based formatting.
+
+        :param values: The values in the row, obtained directly from the ``DataFrame``.
+                 If ``include_index`` parameter to ``format_with_dataframe`` is ``True``,
+                 then the first element in this sequence is the index value for the row.
+        :param row_number: The index (starting with 1) of the row in the worksheet.
+        :param dataframe: The ``pandas.DataFrame`` object, as additional context.
+
+        :return: Either a ``CellFormat`` object or ``None``.
+        """
         raise NotImplementedError()
 
-    def format_for_row(self, values, row_number, dataframe):
+    def format_for_cell(self, value, row_number, col_number, dataframe):
+        """
+        Called by ``format_with_dataframe`` once for each cell in the dataframe.
+        Allows for cell-specific additional formatting to complement any column
+        or row formatting.
+
+        :param value: The value of the cell, obtained directly from the ``DataFrame``.
+        :param row_number: The index (starting with 1) of the row in the worksheet.
+        :param col_number: The index (starting with 1) of the column in the worksheet.
+        :param dataframe: The ``pandas.DataFrame`` object, as additional context.
+
+        :return: Either a ``CellFormat`` object or ``None``.
+        """
         raise NotImplementedError()
 
     def should_freeze_header(self, series, dataframe):
+        """
+        Called by ``format_with_dataframe`` once for each header row or column.
+
+        :param series: A sequence of elements representing the values in the row or column.
+                 Can be a simple list, or a ``pandas.Series`` or ``pandas.Index`` object.
+        :param dataframe: The ``pandas.DataFrame`` object, as additional context.
+
+        :return: boolean value
+        """
         raise NotImplementedError()
 
 class BasicFormatter(DataFrameFormatter):
+    """
+    A basic formatter class that offers: selection of format based on
+    inferred data type of each column; bold headers with a custom background color;
+    frozen header row (and column if index is included); and column-specific
+    override formats.
+    """
 
     @classmethod
     def with_defaults(cls,
@@ -178,16 +253,20 @@ class BasicFormatter(DataFrameFormatter):
         date_format=None,
         decimal_format=None,
         integer_format=None,
-        currency_format=None,
         freeze_headers=None,
         column_formats=None):
+        """
+        Returns an instance of this class, with any unspecified parameters
+        being substituted with this package's default values for the parameters.
+        Instantiate the class directly if you want unspecified parameters to be ``None``
+        and thus always be omitted from formatting operations.
+        """
         return cls(
             (header_background_color or DEFAULT_HEADER_BACKGROUND_COLOR),
             header_text_color,
             date_format,
             decimal_format,
             integer_format,
-            currency_format,
             freeze_headers,
             column_formats
         )
@@ -198,7 +277,6 @@ class BasicFormatter(DataFrameFormatter):
         date_format=None,
         decimal_format=None,
         integer_format=None,
-        currency_format=None,
         freeze_headers=None,
         column_formats=None):
         self.header_background_color = header_background_color
@@ -206,7 +284,6 @@ class BasicFormatter(DataFrameFormatter):
         self.date_format = BasicFormatter.resolve_number_format(date_format or '', 'DATE')
         self.decimal_format = BasicFormatter.resolve_number_format(decimal_format or '', 'NUMBER')
         self.integer_format = BasicFormatter.resolve_number_format(integer_format or '', 'NUMBER')
-        self.currency_format = BasicFormatter.resolve_number_format(currency_format or '', 'CURRENCY')
         self.freeze_headers = bool(freeze_headers)
         self.column_formats = column_formats or {}
 
@@ -234,7 +311,7 @@ class BasicFormatter(DataFrameFormatter):
     def format_for_cell(self, value, row_number, col_number, dataframe):
         return None
 
-    def format_for_row(self, values, row_number, dataframe):
+    def format_for_data_row(self, values, row_number, dataframe):
         return None
 
     def should_freeze_header(self, series, dataframe):
