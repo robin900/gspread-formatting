@@ -174,12 +174,17 @@ def _range_to_gridrange_object(range, worksheet_id):
 def _props_to_component(class_alias, value):
     if class_alias not in _CLASSES:
         raise ValueError("No format component named '%s'" % class_alias)
+    cls = _CLASSES[class_alias]
     kwargs = {}
     for k, v in value.items():
         if isinstance(v, dict):
-            v = _props_to_component(k, v)
+            if isinstance(cls._FIELDS, dict) and k in cls._FIELDS:
+                item_alias = cls._FIELDS[k]
+            else:
+                item_alias = k
+            v = _props_to_component(item_alias, v)
         kwargs[k] = v
-    return _CLASSES[class_alias](**kwargs)
+    return cls(**kwargs)
 
 def _ul_repl(m):
     return '_' + m.group(1).lower()
@@ -356,25 +361,31 @@ class Color(CellFormatComponent):
         self.blue = blue
         self.alpha = alpha
 
+class Border(CellFormatComponent):
+    _FIELDS = ('style', 'color')
+
+    STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
+
+    def __init__(self, style, color=None, width=None):
+        if style.upper() not in Border.STYLES:
+            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
+        self.style = style.upper()
+        self.width = width
+        self.color = color
+
 class Borders(CellFormatComponent):
-    _FIELDS = ('top', 'bottom', 'left', 'right')
+    _FIELDS = {
+        'top': 'border', 
+        'bottom': 'border', 
+        'left': 'border', 
+        'right': 'border'
+    }
 
     def __init__(self, top=None, bottom=None, left=None, right=None):
         self.top = top
         self.bottom = bottom
         self.left = left
         self.right = right
-
-class Border(CellFormatComponent):
-    _FIELDS = ('style', 'color')
-
-    STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
-
-    def __init__(self, style, color):
-        if style.upper() not in Border.STYLES:
-            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
-        self.style = style.upper()
-        self.color = color
 
 class Padding(CellFormatComponent):
     _FIELDS = ('top', 'right', 'bottom', 'left')
