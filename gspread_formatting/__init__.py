@@ -171,7 +171,7 @@ def _range_to_gridrange_object(range, worksheet_id):
     }
 
 
-def _props_to_component(class_alias, value):
+def _props_to_component(class_alias, value, none_if_empty=False):
     if class_alias not in _CLASSES:
         raise ValueError("No format component named '%s'" % class_alias)
     cls = _CLASSES[class_alias]
@@ -182,9 +182,9 @@ def _props_to_component(class_alias, value):
                 item_alias = cls._FIELDS[k]
             else:
                 item_alias = k
-            v = _props_to_component(item_alias, v)
+            v = _props_to_component(item_alias, v, True)
         kwargs[k] = v
-    return cls(**kwargs)
+    return cls(**kwargs) if (kwargs or not none_if_empty) else None
 
 def _ul_repl(m):
     return '_' + m.group(1).lower()
