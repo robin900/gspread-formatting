@@ -462,6 +462,107 @@ class TextRotation(CellFormatComponent):
         self.angle = angle
         self.vertical = vertical
 
+# Conditional formatting objects
+
+class BooleanRule(CellFormatComponent):
+    _FIELDS = ('condition', 'format')
+
+    def __init__(self, condition, format):
+        self.condition = condition
+        self.format = format
+
+class BooleanCondition(CellFormatComponent):
+    _FIELDS = ('type', 'values')
+
+    TYPES = {
+        'NUMBER_GREATER': 1,
+        'NUMBER_GREATER_THAN_EQ': 1,
+        'NUMBER_LESS': 1,
+        'NUMBER_LESS_THAN_EQ': 1,
+        'NUMBER_EQ': 1,
+        'NUMBER_NOT_EQ': 1,
+        'NUMBER_BETWEEN': 2,
+        'NUMBER_NOT_BETWEEN': 2,
+        'TEXT_CONTAINS': 1,
+        'TEXT_NOT_CONTAINS': 1,
+        'TEXT_STARTS_WITH': 1,
+        'TEXT_ENDS_WITH': 1,
+        'TEXT_EQ': 1,
+        'TEXT_IS_EMAIL': 0,
+        'TEXT_IS_URL': 0,
+        'DATE_EQ': 1,
+        'DATE_BEFORE': 1,
+        'DATE_AFTER': 1,
+        'DATE_ON_OR_BEFORE': 1,
+        'DATE_ON_OR_AFTER': 1,
+        'DATE_BETWEEN': 2,
+        'DATE_NOT_BETWEEN': 2,
+        'DATE_IS_VALID': 0,
+        'ONE_OF_RANGE': 1,
+        'ONE_OF_LIST': (lambda x: isinstance(x, (list, tuple)) and len(x) > 0),
+        'BLANK': 0,
+        'NOT_BLANK': 0,
+        'CUSTOM_FORMULA': 1,
+        'BOOLEAN': (lambda x: isinstance(x, (list, tuple)) and len(x) >= 0 and len(x) <= 2)
+    }
+
+    def __init__(self, type, values):
+        if type.upper() not in BooleanCondition.TYPES:
+            raise ValueError("BooleanCondition.type must be one of: %s" % BooleanCondition.TYPES.keys())
+        self.type = type.upper()
+        validator = BooleanCondition.TYPES[self.type]
+        if (callable(validator) and not validator(values)) or len(values) != validator:
+            raise ValueError("BooleanCondition.values has inappropriate length/content for condition type %s" % self.type)
+        # values are either RelativeDate enum values or user-entered values
+        self.values = [ 
+            v if isinstance(v, ConditionValue) else ConditionValue(v) 
+            for v in values 
+        ]
+
+class RelativeDate(object):
+    VALUES = set(['PAST_YEAR', 'PAST_MONTH', 'PAST_WEEK', 'YESTERDAY', 'TODAY', 'TOMORROW'])
+
+    def __init__(self, value):
+        if value.upper() not in RelativeDate.VALUES:
+            raise ValueError("RelativeDate must be one of: %s" % RelativeDate.VALUES)
+        self.value = value.upper()
+
+    def to_props(self):
+        return self.value
+
+class ConditionValue(CellFormatComponent):
+    _FIELDS = ('relativeDate', 'userEnteredValue')
+
+    def __init__(self, value):
+        self.relativeDate = None
+        self.userEnteredValue = None
+        if isinstance(value, RelativeDate):
+            self.relativeDate = value.value
+        else:
+            self.userEnteredValue = value
+
+class InterpolationPoint(CellFormatComponent):
+    _FIELDS = ('color', 'type', 'value')
+
+    TYPES = set(['MIN', 'MAX', 'NUMBER', 'PERCENT', 'PERCENTILE'])
+
+    def __init__(self, color, type, value=None):
+        self.color = color
+        if type.upper() not in InterpolationPoint.TYPES:
+            raise ValueError("InterpolationPoint.type must be one of: %s" % InterpolationPoint.TYPES)
+        self.type = type.upper()
+        if value is None and self.type not in set(['MIN', 'MAX']):
+            raise ValueError("InterpolationPoint.type %s requires a value" % self.type)
+        self.value = value
+
+class GradientRule(CellFormatComponent):
+    _FIELDS = ('minpoint', 'midpoint', 'maxpoint')
+
+    def __init__(self, minpoint, midpoint, maxpoint):
+        self.minpoint = minpoint
+        self.midpoint = midpoint
+        self.maxpoint = maxpoint
+
 # provide camelCase aliases for all component classes.
 
 _CLASSES = {}
