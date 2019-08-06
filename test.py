@@ -95,10 +95,13 @@ class WorksheetTest(GspreadTest):
         super(WorksheetTest, self).setUp()
         if self.__class__.spreadsheet is None:
             self.__class__.setUpClass()
-        # NOTE(msuozzo): Here, a new worksheet is created for each test.
-        # This was determined to be faster than reusing a single sheet and
-        # having to clear its contents after each test.
-        # Basically: Time(add_wks + del_wks) < Time(range + update_cells)
+        try:
+            test_sheet = self.spreadsheet.worksheet('wksht_test')
+            if test_sheet:
+                # somehow left over from interrupted test, remove.
+                self.spreadsheet.del_worksheet(test_sheet)
+        except gspread.exceptions.WorksheetNotFound:
+            pass # expected
         self.sheet = self.spreadsheet.add_worksheet('wksht_test', 20, 20)
 
     def tearDown(self):
@@ -222,6 +225,31 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_fmt.numberFormat.pattern, ' DD MM YYYY')
         dt = self.sheet.acell('A1').value
         self.assertEqual(dt, ' 01 09 2018')
+
+    def test_data_validation_rule(self):
+        rows = [
+            ["A", "B", "C", "D"],
+            ["1", "2", "3", "4"]
+        ]
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+        validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']), 
+            showCustomUi=True
+        )
+        set_data_validation_for_cell_range(self.sheet, 'A2:D2', validation_rule)
+        # No data validation for A1
+        eff_rule = get_data_validation_rule(self.sheet, 'A1')
+        self.assertEqual(eff_rule, None)
+        # data validation for A2 should be equal to validation_rule
+        eff_rule = get_data_validation_rule(self.sheet, 'A2')
+        self.assertEqual(eff_rule.condition.type, 'ONE_OF_LIST')
+        self.assertEqual([ x.userEnteredValue for x in eff_rule.condition.values ], ['1', '2', '3', '4'])
+        self.assertEqual(eff_rule.showCustomUi, True)
+        self.assertEqual(eff_rule.strict, None)
+        self.assertEqual(eff_rule, validation_rule)
 
     def test_dataframe_formatter(self):
         rows = [  
