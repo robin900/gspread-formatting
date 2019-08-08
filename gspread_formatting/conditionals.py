@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .util import _parse_string_enum, _underlower, _enforce_type
-from .models import FormattingComponent, _CLASSES
+from .models import FormattingComponent, GridRange, _CLASSES
 
 class ConditionalFormattingComponent(FormattingComponent):
     pass
@@ -59,7 +59,7 @@ class BooleanCondition(ConditionalFormattingComponent):
             )
         # values are either RelativeDate enum values or user-entered values
         self.values = [ 
-            v if isinstance(v, ConditionValue) else ConditionValue(v) 
+            v if isinstance(v, ConditionValue) else ConditionValue.from_props(v) 
             for v in values 
         ]
 
@@ -120,6 +120,30 @@ class GradientRule(ConditionalFormattingComponent):
         self.minpoint = minpoint
         self.midpoint = midpoint
         self.maxpoint = maxpoint
+
+class ConditionalFormatRule(ConditionalFormattingComponent):
+    _FIELDS = ('ranges', 'booleanRule', 'gradientRule')
+
+    def __init__(self, ranges, booleanRule=None, gradientRule=None):
+        self.booleanRule = _enforce_type("booleanRule", BooleanRule, booleanRule, required=False)
+        self.gradientRule = _enforce_type("gradientRule", GradientRule, gradientRule, required=False)
+        if len([x for x in (self.booleanRule, self.gradientRule) if x is not None]) != 1:
+            raise ValueError("Must specify exactly one of: booleanRule, gradientRule")
+        # values are either GridRange objects or bare properties
+        self.ranges = [ 
+            v if isinstance(v, GridRange) else GridRange.from_props(v) 
+            for v in ranges 
+        ]
+
+    def to_props(self):
+        p = {
+            'ranges': [ v.to_props() for v in self.ranges ]
+        }
+        if self.booleanRule:
+            p['booleanRule'] = self.booleanRule.to_props()
+        if self.gradientRule:
+            p['gradientRule'] = self.gradientRule.to_props()
+        return p
 
 class DataValidationRule(FormattingComponent):
     _FIELDS = {

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
-    _parse_string_enum, _underlower
+    _parse_string_enum, _underlower, _range_to_gridrange_object
                   
 class FormattingComponent(object):
     _FIELDS = ()
@@ -99,6 +99,20 @@ class FormattingComponent(object):
         return self.__class__.from_props(new_props) if new_props else None
 
     __sub__ = difference
+
+class GridRange(FormattingComponent):
+    _FIELDS = ('sheetId', 'startRowIndex', 'endRowIndex', 'startColumnIndex', 'endColumnIndex')
+
+    @classmethod
+    def from_a1_range(cls, range):
+        return GridRange.from_props(_range_to_gridrange_object(range))
+
+    def __init__(self, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex):
+        self.sheetId = sheetId
+        self.startRowIndex = startRowIndex
+        self.endRowIndex = endRowIndex
+        self.startColumnIndex = startColumnIndex
+        self.endColumnIndex = endColumnIndex
 
 class CellFormatComponent(FormattingComponent):
     pass
