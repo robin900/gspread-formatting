@@ -22,7 +22,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst'), 'rb') as f:
 setup(
     name='gspread-formatting',
     version=VERSION,
-    py_modules=['gspread_formatting'],
+    packages=['gspread_formatting'],
     test_suite='test',
     install_requires=[
         'gspread>=3.0.0' 
