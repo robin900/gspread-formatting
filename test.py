@@ -38,14 +38,25 @@ SCOPE = [
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
 
 
-def read_config(filename):
+def read_config():
     config = ConfigParser.ConfigParser()
-    config.readfp(open(filename))
+    envconfig = os.environ.get('GSPREAD_FORMATTING_CONFIG')
+    if envconfig:
+        fp = StringIO(envconfig)
+    else:
+        fp = open(CONFIG_FILENAME)
+    try:
+        config.readfp(fp)
+    finally:
+        fp.close()
     return config
 
-
-def read_credentials(filename):
-    return ServiceAccountCredentials.from_json_keyfile_name(filename, SCOPE)
+def read_credentials():
+    credjson = os.environ.get('GSPREAD_FORMATTING_CREDENTIALS')
+    if credjson:
+        return ServiceAccountCredentials.from_json_keyfile_dict(json.loads(credjson), SCOPE)
+    else:
+        return ServiceAccountCredentials.from_json_keyfile_name(CREDS_FILENAME, SCOPE)
 
 
 def gen_value(prefix=None):
@@ -62,8 +73,8 @@ class GspreadTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            cls.config = read_config(CONFIG_FILENAME)
-            credentials = read_credentials(CREDS_FILENAME)
+            cls.config = read_config()
+            credentials = read_credentials()
             cls.gc = gspread.authorize(credentials)
         except IOError as e:
             msg = "Can't find %s for reading test configuration. "
