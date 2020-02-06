@@ -4,8 +4,8 @@ python:
 - '3.4'
 - '3.5'
 - '3.6'
-- 3.6-dev
-- 3.7-dev
+- '3.7'
+- '3.8'
 - nightly
 before_install:
 - openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
