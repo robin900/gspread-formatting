@@ -10,7 +10,7 @@ def _build_repeat_cell_request(worksheet, range, cell_format, celldata_field='us
             'fields': ",".join(cell_format.affected_fields(celldata_field))
         }
     }
-    
+
 def _fetch_with_updated_properties(spreadsheet, key, params=None):
     try:
         return spreadsheet._properties[key]
@@ -33,7 +33,6 @@ def _range_to_gridrange_object(range, worksheet_id):
         'endColumnIndex': last_column
     }
 
-
 def _props_to_component(class_registry, class_alias, value, none_if_empty=False):
     if class_alias not in class_registry:
         raise ValueError("No format component named '%s'" % class_alias)
@@ -41,12 +40,13 @@ def _props_to_component(class_registry, class_alias, value, none_if_empty=False)
     kwargs = {}
     for k, v in value.items():
         if isinstance(v, dict):
-            if isinstance(cls._FIELDS, dict) and k in cls._FIELDS:
+            if isinstance(cls._FIELDS, dict) and cls._FIELDS.get(k) is not None:
                 item_alias = cls._FIELDS[k]
             else:
                 item_alias = k
             v = _props_to_component(class_registry, item_alias, v, True)
-        kwargs[k] = v
+        if v is not None:
+            kwargs[k] = v
     return cls(**kwargs) if (kwargs or not none_if_empty) else None
 
 def _ul_repl(m):
@@ -81,3 +81,4 @@ def _extract_fieldrefs(name, value, prefix):
         return [".".join([prefix, name])]
     else:
         return []
+

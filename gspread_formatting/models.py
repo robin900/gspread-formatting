@@ -118,13 +118,23 @@ class CellFormatComponent(FormattingComponent):
     pass
 
 class CellFormat(CellFormatComponent):
-    _FIELDS = (
-        'numberFormat', 'backgroundColor', 'borders', 'padding', 
-        'horizontalAlignment', 'verticalAlignment', 'wrapStrategy', 
-        'textDirection', 'textFormat', 'hyperlinkDisplayType', 'textRotation'
-    )
+    _FIELDS = {
+        'numberFormat': None,
+        'backgroundColor': 'color',
+        'borders': None,
+        'padding': None,
+        'horizontalAlignment': None,
+        'verticalAlignment': None,
+        'wrapStrategy': None,
+        'textDirection': None,
+        'textFormat': None,
+        'hyperlinkDisplayType': None,
+        'textRotation': None,
+        'foregroundColorStyle': 'colorStyle',
+        'backgroundColorStyle': 'colorStyle'
+    }
 
-    def __init__(self, 
+    def __init__(self,
         numberFormat=None,
         backgroundColor=None,
         borders=None,
@@ -135,7 +145,9 @@ class CellFormat(CellFormatComponent):
         textDirection=None,
         textFormat=None,
         hyperlinkDisplayType=None,
-        textRotation=None
+        textRotation=None,
+        foregroundColorStyle=None,
+        backgroundColorStyle=None
         ):
         self.numberFormat = numberFormat
         self.backgroundColor = backgroundColor
@@ -148,6 +160,8 @@ class CellFormat(CellFormatComponent):
         self.textFormat = textFormat
         self.hyperlinkDisplayType = _parse_string_enum('hyperlinkDisplayType', hyperlinkDisplayType, set(['LINKED', 'PLAIN_TEXT']))
         self.textRotation = textRotation
+        self.foregroundColorStyle = foregroundColorStyle
+        self.backgroundColorStyle = backgroundColorStyle
 
 class NumberFormat(CellFormatComponent):
     _FIELDS = ('type', 'pattern')
@@ -155,8 +169,20 @@ class NumberFormat(CellFormatComponent):
     TYPES = set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])
 
     def __init__(self, type, pattern=None):
-        self.type = _parse_string_enum("type", type, NumberFormat.TYPES, required=True)
+        if type.upper() not in NumberFormat.TYPES:
+            raise ValueError("NumberFormat.type must be one of: %s" % NumberFormat.TYPES)
+        self.type = type.upper()
         self.pattern = pattern
+
+class ColorStyle(CellFormatComponent):
+    _FIELDS = {
+        'themeColor': None,
+        'rgbColor': 'color'
+    }
+
+    def __init__(self, themeColor=None, rgbColor=None):
+        self.themeColor = themeColor
+        self.rgbColor = rgbColor
 
 class Color(CellFormatComponent):
     _FIELDS = ('red', 'green', 'blue', 'alpha')
@@ -168,20 +194,23 @@ class Color(CellFormatComponent):
         self.alpha = alpha
 
 class Border(CellFormatComponent):
-    _FIELDS = ('style', 'color')
+    _FIELDS = ('style', 'color', 'colorStyle')
 
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
-    def __init__(self, style, color=None, width=None):
-        self.style = _parse_string_enum("style", style, Border.STYLES, required=True)
+    def __init__(self, style, color=None, width=None, colorStyle=None):
+        if style.upper() not in Border.STYLES:
+            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
+        self.style = style.upper()
         self.width = width
         self.color = color
+        self.colorStyle = colorStyle
 
 class Borders(CellFormatComponent):
     _FIELDS = {
-        'top': 'border', 
-        'bottom': 'border', 
-        'left': 'border', 
+        'top': 'border',
+        'bottom': 'border',
+        'left': 'border',
         'right': 'border'
     }
 
@@ -201,16 +230,26 @@ class Padding(CellFormatComponent):
         self.left = left
 
 class TextFormat(CellFormatComponent):
-    _FIELDS = ('foregroundColor', 'fontFamily', 'fontSize', 'bold', 'italic', 'strikethrough', 'underline')
+    _FIELDS = {
+        'foregroundColor': 'color',
+        'fontFamily': None,
+        'fontSize': None,
+        'bold': None,
+        'italic': None,
+        'strikethrough': None,
+        'underline': None,
+        'foregroundColorStyle': 'colorStyle'
+    }
 
-    def __init__(self, 
-        foregroundColor=None, 
-        fontFamily=None, 
-        fontSize=None, 
-        bold=None, 
-        italic=None, 
-        strikethrough=None, 
-        underline=None
+    def __init__(self,
+        foregroundColor=None,
+        fontFamily=None,
+        fontSize=None,
+        bold=None,
+        italic=None,
+        strikethrough=None,
+        underline=None,
+        foregroundColorStyle=None
         ):
         self.foregroundColor = foregroundColor
         self.fontFamily = fontFamily
@@ -219,6 +258,7 @@ class TextFormat(CellFormatComponent):
         self.italic = italic
         self.strikethrough = strikethrough
         self.underline = underline
+        self.foregroundColorStyle = foregroundColorStyle
 
 class TextRotation(CellFormatComponent):
     _FIELDS = ('angle', 'vertical')
@@ -229,111 +269,10 @@ class TextRotation(CellFormatComponent):
         self.angle = angle
         self.vertical = vertical
 
-# Conditional formatting objects
-
-class BooleanRule(CellFormatComponent):
-    _FIELDS = ('condition', 'format')
-
-    def __init__(self, condition, format):
-        self.condition = condition
-        self.format = format
-
-class BooleanCondition(CellFormatComponent):
-    _FIELDS = ('type', 'values')
-
-    TYPES = {
-        'NUMBER_GREATER': 1,
-        'NUMBER_GREATER_THAN_EQ': 1,
-        'NUMBER_LESS': 1,
-        'NUMBER_LESS_THAN_EQ': 1,
-        'NUMBER_EQ': 1,
-        'NUMBER_NOT_EQ': 1,
-        'NUMBER_BETWEEN': 2,
-        'NUMBER_NOT_BETWEEN': 2,
-        'TEXT_CONTAINS': 1,
-        'TEXT_NOT_CONTAINS': 1,
-        'TEXT_STARTS_WITH': 1,
-        'TEXT_ENDS_WITH': 1,
-        'TEXT_EQ': 1,
-        'TEXT_IS_EMAIL': 0,
-        'TEXT_IS_URL': 0,
-        'DATE_EQ': 1,
-        'DATE_BEFORE': 1,
-        'DATE_AFTER': 1,
-        'DATE_ON_OR_BEFORE': 1,
-        'DATE_ON_OR_AFTER': 1,
-        'DATE_BETWEEN': 2,
-        'DATE_NOT_BETWEEN': 2,
-        'DATE_IS_VALID': 0,
-        'ONE_OF_RANGE': 1,
-        'ONE_OF_LIST': (lambda x: isinstance(x, (list, tuple)) and len(x) > 0),
-        'BLANK': 0,
-        'NOT_BLANK': 0,
-        'CUSTOM_FORMULA': 1,
-        'BOOLEAN': (lambda x: isinstance(x, (list, tuple)) and len(x) >= 0 and len(x) <= 2)
-    }
-
-    def __init__(self, type, values):
-        self.type = _parse_string_enum("type", type, BooleanCondition.TYPES.keys())
-        validator = BooleanCondition.TYPES[self.type]
-        if (callable(validator) and not validator(values)) or len(values) != validator:
-            raise ValueError("BooleanCondition.values has inappropriate length/content for condition type %s" % self.type)
-        # values are either RelativeDate enum values or user-entered values
-        self.values = [ 
-            v if isinstance(v, ConditionValue) else ConditionValue(v) 
-            for v in values 
-        ]
-
-class RelativeDate(object):
-    VALUES = set(['PAST_YEAR', 'PAST_MONTH', 'PAST_WEEK', 'YESTERDAY', 'TODAY', 'TOMORROW'])
-
-    def __init__(self, value):
-        self.value = _parse_string_enum("value", value, RelativeDate.VALUES, required=True)
-
-    def to_props(self):
-        return self.value
-
-class ConditionValue(CellFormatComponent):
-    _FIELDS = ('relativeDate', 'userEnteredValue')
-
-    def __init__(self, value):
-        self.relativeDate = None
-        self.userEnteredValue = None
-        if isinstance(value, RelativeDate):
-            self.relativeDate = value.value
-        else:
-            self.userEnteredValue = value
-
-class InterpolationPoint(CellFormatComponent):
-    _FIELDS = ('color', 'type', 'value')
-
-    TYPES = set(['MIN', 'MAX', 'NUMBER', 'PERCENT', 'PERCENTILE'])
-
-    def __init__(self, color, type, value=None):
-        self.color = color
-        self.type = _parse_string_enum("type", type, InterpolationPoint.TYPES, required=True)
-        if value is None and self.type not in set(['MIN', 'MAX']):
-            raise ValueError("InterpolationPoint.type %s requires a value" % self.type)
-        self.value = value
-
-class GradientRule(CellFormatComponent):
-    _FIELDS = ('minpoint', 'midpoint', 'maxpoint')
-
-    def __init__(self, minpoint, midpoint, maxpoint):
-        self.minpoint = minpoint
-        self.midpoint = midpoint
-        self.maxpoint = maxpoint
-
 # provide camelCase aliases for all component classes.
 
 _CLASSES = {}
-for _c in [ 
-        obj for name, obj in locals().items() 
-        if isinstance(obj, type) and issubclass(obj, FormattingComponent) 
-    ]:
+for _c in [ obj for name, obj in locals().items() if isinstance(obj, type) and issubclass(obj, CellFormatComponent) ]:
     _k = _underlower(_c.__name__)
     _CLASSES[_k] = _c
     locals()[_k] = _c
-_CLASSES['foregroundColor'] = Color
-_CLASSES['backgroundColor'] = Color
-

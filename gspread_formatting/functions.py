@@ -16,18 +16,18 @@ __all__ = (
 )
 
 def format_cell_ranges(worksheet, ranges):
-    """Update a list of Cell object ranges of :class:`Cell` objects 
+    """Update a list of Cell object ranges of :class:`Cell` objects
     in the given ``Worksheet`` to have the accompanying ``CellFormat``.
 
     :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of: 
-        a string with range value in A1 notation, e.g. 'A1:A5', 
+    :param ranges: An iterable whose elements are pairs of:
+        a string with range value in A1 notation, e.g. 'A1:A5',
         and a ``CellFormat`` object).
     """
 
     body = {
-        'requests': [ 
-            _build_repeat_cell_request(worksheet, range, cell_format) 
+        'requests': [
+            _build_repeat_cell_request(worksheet, range, cell_format)
             for range, cell_format in ranges
         ]
     }
@@ -35,7 +35,7 @@ def format_cell_ranges(worksheet, ranges):
     return worksheet.spreadsheet.batch_update(body)
 
 def format_cell_range(worksheet, name, cell_format):
-    """Update a range of :class:`Cell` objects in the given Worksheet 
+    """Update a range of :class:`Cell` objects in the given Worksheet
     to have the specified ``CellFormat``.
 
     :param worksheet: The ``Worksheet`` object.
@@ -46,18 +46,17 @@ def format_cell_range(worksheet, name, cell_format):
     return format_cell_ranges(worksheet, [(name, cell_format)])
 
 def set_data_validation_for_cell_ranges(worksheet, ranges):
-    """Update a list of Cell object ranges of :class:`Cell` objects 
+    """Update a list of Cell object ranges of :class:`Cell` objects
     in the given ``Worksheet`` to have the accompanying ``DataValidationRule``.
-
     :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of: 
-        a string with range value in A1 notation, e.g. 'A1:A5', 
+    :param ranges: An iterable whose elements are pairs of:
+        a string with range value in A1 notation, e.g. 'A1:A5',
         and a ``DataValidationRule`` object).
     """
 
     body = {
-        'requests': [ 
-            _build_repeat_cell_request(worksheet, range, data_validation_rule, 'dataValidation') 
+        'requests': [
+            _build_repeat_cell_request(worksheet, range, data_validation_rule, 'dataValidation')
             for range, data_validation_rule in ranges
         ]
     }
@@ -65,9 +64,8 @@ def set_data_validation_for_cell_ranges(worksheet, ranges):
     return worksheet.spreadsheet.batch_update(body)
 
 def set_data_validation_for_cell_range(worksheet, range, rule):
-    """Update a list of Cell object ranges in the given ``Worksheet`` 
+    """Update a list of Cell object ranges in the given ``Worksheet``
     to have the accompanying ``DataValidationRule``.
-
     :param worksheet: The ``Worksheet`` object.
     :param range: A string with range value in A1 notation, e.g. 'A1:A5'.
     :param rule: A DataValidationRule object.
@@ -76,15 +74,13 @@ def set_data_validation_for_cell_range(worksheet, range, rule):
     return set_data_validation_for_cell_ranges(worksheet, [(range, rule)])
 
 def get_data_validation_rule(worksheet, label):
-    """Returns a DataValidationRule object or None representing the 
+    """Returns a DataValidationRule object or None representing the
     data validation in effect for the cell identified by ``label``.
-
-    :param worksheet: Worksheet object containing the cell whose data 
+    :param worksheet: Worksheet object containing the cell whose data
                       validation rule is desired.
     :param label: String with cell label in common format, e.g. 'B1'.
                   Letter case is ignored.
     Example:
-
     >>> get_data_validation_rule(worksheet, 'A1')
     <DataValidationRule condition=(bold=True)>
     >>> get_data_validation_rule(worksheet, 'A2')
@@ -99,7 +95,6 @@ def get_data_validation_rule(worksheet, label):
     })
     props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('dataValidation')
     return DataValidationRule.from_props(props) if props else None
-
 
 def get_default_format(spreadsheet):
     """Return Default CellFormat for spreadsheet, or None if no default formatting was specified."""

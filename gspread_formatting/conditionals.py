@@ -59,7 +59,11 @@ class BooleanCondition(ConditionalFormattingComponent):
             )
         # values are either RelativeDate enum values or user-entered values
         self.values = [ 
-            v if isinstance(v, ConditionValue) else ConditionValue.from_props(v) 
+            v if isinstance(v, ConditionValue) else (
+                ConditionValue.from_props(v) 
+                if isinstance(v, dict) 
+                else ConditionValue(userEnteredValue=v)
+            )
             for v in values 
         ]
 
@@ -83,23 +87,9 @@ class RelativeDate(FormattingComponent):
 class ConditionValue(ConditionalFormattingComponent):
     _FIELDS = ('relativeDate', 'userEnteredValue')
 
-    def __init__(self, value):
-        self.relativeDate = None
-        self.userEnteredValue = None
-        if isinstance(value, dict):
-            if 'relativeDate' in value:
-                value = RelativeDate(value['relativeDate'])
-            elif 'userEnteredValue' in value:
-                value = value['userEnteredValue']
-            else:
-                raise ValueError(
-                    "ConditionValue must be either "
-                    "relativeDate or userEnteredValue, not: %s" % value
-                )
-        if isinstance(value, RelativeDate):
-            self.relativeDate = value.value
-        else:
-            self.userEnteredValue = value
+    def __init__(self, relativeDate=None, userEnteredValue=None):
+        self.relativeDate = relativeDate
+        self.userEnteredValue = userEnteredValue
 
 class InterpolationPoint(ConditionalFormattingComponent):
     _FIELDS = ('color', 'type', 'value')
@@ -114,12 +104,16 @@ class InterpolationPoint(ConditionalFormattingComponent):
         self.value = value
 
 class GradientRule(ConditionalFormattingComponent):
-    _FIELDS = ('minpoint', 'midpoint', 'maxpoint')
+    _FIELDS = {
+        'minpoint': 'interpolationPoint', 
+        'midpoint': 'interpolationPoint', 
+        'maxpoint': 'interpolationPoint'
+    }
 
-    def __init__(self, minpoint, midpoint, maxpoint):
-        self.minpoint = minpoint
-        self.midpoint = midpoint
-        self.maxpoint = maxpoint
+    def __init__(self, minpoint, maxpoint, midpoint=None):
+        self.minpoint = _enforce_type("minpoint", InterpolationPoint, minpoint, required=True)
+        self.midpoint = _enforce_type("midpoint", InterpolationPoint, midpoint, required=False)
+        self.maxpoint = _enforce_type("maxpoint", InterpolationPoint, maxpoint, required=True)
 
 class ConditionalFormatRule(ConditionalFormattingComponent):
     _FIELDS = ('ranges', 'booleanRule', 'gradientRule')
