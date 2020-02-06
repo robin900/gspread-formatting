@@ -11,6 +11,11 @@ import pandas as pd
 from gspread_dataframe import set_with_dataframe
 
 try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
