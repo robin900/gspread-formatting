@@ -126,12 +126,15 @@ class WorksheetTest(GspreadTest):
             cell.value = value
         self.sheet.update_cells(cell_list)
 
-        fmt = cellFormat(textFormat=textFormat(bold=True))
+        fmt = cellFormat(textFormat=textFormat(bold=True), backgroundColorStyle=ColorStyle(rgbColor=Color(1,0,0)))
         format_cell_ranges(self.sheet, [('A1:B6', fmt), ('C1:D6', fmt)])
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
-        self.assertEqual(ue_fmt, fmt)
         self.assertEqual(ue_fmt.textFormat.bold, True)
+        # userEnteredFormat will not have backgroundColorStyle...
         eff_fmt = get_effective_format(self.sheet, 'A1')
+        self.assertEqual(eff_fmt.textFormat.bold, True)
+        # effectiveFormat will have backgroundColorStyle...
+        self.assertEqual(eff_fmt.backgroundColorStyle.rgbColor.red, 1)
         self.assertEqual(eff_fmt.textFormat.bold, True)
         fmt2 = cellFormat(textFormat=textFormat(italic=True))
         format_cell_range(self.sheet, 'A1:D6', fmt2)
@@ -176,6 +179,11 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(pr.get('frozenColumnCount'), 1)
         self.assertEqual(get_frozen_row_count(self.sheet), 1)
         self.assertEqual(get_frozen_column_count(self.sheet), 1)
+
+    def test_format_props_roundtrip(self):
+        fmt = cellFormat(backgroundColor=Color(1,0,1),textFormat=textFormat(italic=False))
+        fmt_roundtrip = CellFormat.from_props(fmt.to_props())
+        self.assertEqual(fmt, fmt_roundtrip)
 
     def test_formats_equality_and_arithmetic(self):
         def_fmt = cellFormat(backgroundColor=Color(1,0,1),textFormat=textFormat(italic=False))

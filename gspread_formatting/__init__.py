@@ -178,12 +178,13 @@ def _props_to_component(class_alias, value, none_if_empty=False):
     kwargs = {}
     for k, v in value.items():
         if isinstance(v, dict):
-            if isinstance(cls._FIELDS, dict) and k in cls._FIELDS:
+            if isinstance(cls._FIELDS, dict) and cls._FIELDS.get(k) is not None:
                 item_alias = cls._FIELDS[k]
             else:
                 item_alias = k
             v = _props_to_component(item_alias, v, True)
-        kwargs[k] = v
+        if v is not None:
+            kwargs[k] = v
     return cls(**kwargs) if (kwargs or not none_if_empty) else None
 
 def _ul_repl(m):
@@ -310,11 +311,21 @@ class CellFormatComponent(object):
     __sub__ = difference
 
 class CellFormat(CellFormatComponent):
-    _FIELDS = (
-        'numberFormat', 'backgroundColor', 'borders', 'padding', 
-        'horizontalAlignment', 'verticalAlignment', 'wrapStrategy', 
-        'textDirection', 'textFormat', 'hyperlinkDisplayType', 'textRotation'
-    )
+    _FIELDS = {
+        'numberFormat': None,
+        'backgroundColor': 'color', 
+        'borders': None,
+        'padding': None,
+        'horizontalAlignment': None, 
+        'verticalAlignment': None, 
+        'wrapStrategy': None, 
+        'textDirection': None, 
+        'textFormat': None, 
+        'hyperlinkDisplayType': None, 
+        'textRotation': None,
+        'foregroundColorStyle': 'colorStyle', 
+        'backgroundColorStyle': 'colorStyle'
+    }
 
     def __init__(self, 
         numberFormat=None,
@@ -327,7 +338,9 @@ class CellFormat(CellFormatComponent):
         textDirection=None,
         textFormat=None,
         hyperlinkDisplayType=None,
-        textRotation=None
+        textRotation=None,
+        foregroundColorStyle=None,
+        backgroundColorStyle=None
         ):
         self.numberFormat = numberFormat
         self.backgroundColor = backgroundColor
@@ -340,6 +353,8 @@ class CellFormat(CellFormatComponent):
         self.textFormat = textFormat
         self.hyperlinkDisplayType = _parse_string_enum('hyperlinkDisplayType', hyperlinkDisplayType, set(['LINKED', 'PLAIN_TEXT']))
         self.textRotation = textRotation
+        self.foregroundColorStyle = foregroundColorStyle
+        self.backgroundColorStyle = backgroundColorStyle 
 
 class NumberFormat(CellFormatComponent):
     _FIELDS = ('type', 'pattern')
@@ -352,6 +367,16 @@ class NumberFormat(CellFormatComponent):
         self.type = type.upper()
         self.pattern = pattern
 
+class ColorStyle(CellFormatComponent):
+    _FIELDS = {
+        'themeColor': None, 
+        'rgbColor': 'color'
+    }
+
+    def __init__(self, themeColor=None, rgbColor=None):
+        self.themeColor = themeColor
+        self.rgbColor = rgbColor
+    
 class Color(CellFormatComponent):
     _FIELDS = ('red', 'green', 'blue', 'alpha')
 
@@ -362,16 +387,17 @@ class Color(CellFormatComponent):
         self.alpha = alpha
 
 class Border(CellFormatComponent):
-    _FIELDS = ('style', 'color')
+    _FIELDS = ('style', 'color', 'colorStyle')
 
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
-    def __init__(self, style, color=None, width=None):
+    def __init__(self, style, color=None, width=None, colorStyle=None):
         if style.upper() not in Border.STYLES:
             raise ValueError("Border.style must be one of: %s" % Border.STYLES)
         self.style = style.upper()
         self.width = width
         self.color = color
+        self.colorStyle = colorStyle
 
 class Borders(CellFormatComponent):
     _FIELDS = {
@@ -397,7 +423,16 @@ class Padding(CellFormatComponent):
         self.left = left
 
 class TextFormat(CellFormatComponent):
-    _FIELDS = ('foregroundColor', 'fontFamily', 'fontSize', 'bold', 'italic', 'strikethrough', 'underline')
+    _FIELDS = {
+        'foregroundColor': 'color', 
+        'fontFamily': None, 
+        'fontSize': None, 
+        'bold': None, 
+        'italic': None, 
+        'strikethrough': None, 
+        'underline': None,
+        'foregroundColorStyle': 'colorStyle'
+    }
 
     def __init__(self, 
         foregroundColor=None, 
@@ -406,7 +441,8 @@ class TextFormat(CellFormatComponent):
         bold=None, 
         italic=None, 
         strikethrough=None, 
-        underline=None
+        underline=None,
+        foregroundColorStyle=None
         ):
         self.foregroundColor = foregroundColor
         self.fontFamily = fontFamily
@@ -415,6 +451,7 @@ class TextFormat(CellFormatComponent):
         self.italic = italic
         self.strikethrough = strikethrough
         self.underline = underline
+        self.foregroundColorStyle = foregroundColorStyle
 
 class TextRotation(CellFormatComponent):
     _FIELDS = ('angle', 'vertical')
@@ -432,6 +469,8 @@ for _c in [ obj for name, obj in locals().items() if isinstance(obj, type) and i
     _k = _underlower(_c.__name__)
     _CLASSES[_k] = _c
     locals()[_k] = _c
-_CLASSES['foregroundColor'] = Color
-_CLASSES['backgroundColor'] = Color
+#_CLASSES['foregroundColor'] = Color
+#_CLASSES['backgroundColor'] = Color
+#_CLASSES['foregroundColorStyle'] = ColorStyle
+#_CLASSES['backgroundColorStyle'] = ColorStyle
 
