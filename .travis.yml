@@ -8,10 +8,13 @@ python:
 - 3.7-dev
 - nightly
 before_install:
-- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv -in creds.json.enc -out creds.json -d
-- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv -in tests.config.enc -out tests.config -d
+- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
+  -in creds.json.enc -out creds.json -d
+- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
+  -in tests.config.enc -out tests.config -d
 install:
 - pip install -U pip
 - pip install -r requirements-test.txt
-- if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then pip install --only-binary -e .; else pip install --prefer-binary -e .; fi
-script: python setup.py test 
+- if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then pip install --only-binary -e .; else
+  pip install --prefer-binary -e .; fi
+script: python setup.py test
