@@ -9,9 +9,8 @@ python:
 - nightly
 before_install:
 - openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
-  -in creds.json.enc -out creds.json -d
-- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
-  -in tests.config.enc -out tests.config -d
+  -in .travis.secrets.tar.gz.enc -out .travis.secrets.tar.gz -d
+- tar xvzf .travis.secrets.tar.gz
 install:
 - pip install -U pip
 - pip install -r requirements-test.txt
