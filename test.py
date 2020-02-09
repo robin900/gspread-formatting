@@ -50,8 +50,12 @@ def read_config():
         fp = StringIO(envconfig)
     else:
         fp = open(CONFIG_FILENAME)
+    if hasattr(config, 'read_file'):
+       read_func = config.read_file
+    else:
+       read_func = config.readfp
     try:
-        config.read_file(fp)
+        read_func(fp)
     finally:
         fp.close()
     return config
