@@ -2,12 +2,9 @@ language: python
 cache: pip
 python:
 - '2.7'
-- '3.4'
-- '3.5'
 - '3.6'
 - '3.7'
 - '3.8'
-- nightly
 before_install:
 - openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
   -in .travis.secrets.tar.gz.enc -out .travis.secrets.tar.gz -d
