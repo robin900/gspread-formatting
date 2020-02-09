@@ -11,6 +11,11 @@ import pandas as pd
 from gspread_dataframe import set_with_dataframe
 
 try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
@@ -38,14 +43,29 @@ SCOPE = [
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
 
 
-def read_config(filename):
+def read_config():
     config = ConfigParser.ConfigParser()
-    config.readfp(open(filename))
+    envconfig = os.environ.get('GSPREAD_FORMATTING_CONFIG')
+    if envconfig:
+        fp = StringIO(envconfig)
+    else:
+        fp = open(CONFIG_FILENAME)
+    if hasattr(config, 'read_file'):
+       read_func = config.read_file
+    else:
+       read_func = config.readfp
+    try:
+        read_func(fp)
+    finally:
+        fp.close()
     return config
 
-
-def read_credentials(filename):
-    return ServiceAccountCredentials.from_json_keyfile_name(filename, SCOPE)
+def read_credentials():
+    credjson = os.environ.get('GSPREAD_FORMATTING_CREDENTIALS')
+    if credjson:
+        return ServiceAccountCredentials.from_json_keyfile_dict(json.loads(credjson), SCOPE)
+    else:
+        return ServiceAccountCredentials.from_json_keyfile_name(CREDS_FILENAME, SCOPE)
 
 
 def gen_value(prefix=None):
@@ -62,8 +82,8 @@ class GspreadTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            cls.config = read_config(CONFIG_FILENAME)
-            credentials = read_credentials(CREDS_FILENAME)
+            cls.config = read_config()
+            credentials = read_credentials()
             cls.gc = gspread.authorize(credentials)
         except IOError as e:
             msg = "Can't find %s for reading test configuration. "
@@ -95,10 +115,13 @@ class WorksheetTest(GspreadTest):
         super(WorksheetTest, self).setUp()
         if self.__class__.spreadsheet is None:
             self.__class__.setUpClass()
-        # NOTE(msuozzo): Here, a new worksheet is created for each test.
-        # This was determined to be faster than reusing a single sheet and
-        # having to clear its contents after each test.
-        # Basically: Time(add_wks + del_wks) < Time(range + update_cells)
+        try:
+            test_sheet = self.spreadsheet.worksheet('wksht_test')
+            if test_sheet:
+                # somehow left over from interrupted test, remove.
+                self.spreadsheet.del_worksheet(test_sheet)
+        except gspread.exceptions.WorksheetNotFound:
+            pass # expected
         self.sheet = self.spreadsheet.add_worksheet('wksht_test', 20, 20)
 
     def tearDown(self):
@@ -222,6 +245,31 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_fmt.numberFormat.pattern, ' DD MM YYYY')
         dt = self.sheet.acell('A1').value
         self.assertEqual(dt, ' 01 09 2018')
+
+    def test_data_validation_rule(self):
+        rows = [
+            ["A", "B", "C", "D"],
+            ["1", "2", "3", "4"]
+        ]
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+        validation_rule = DataValidationRule(
+            BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']), 
+            showCustomUi=True
+        )
+        set_data_validation_for_cell_range(self.sheet, 'A2:D2', validation_rule)
+        # No data validation for A1
+        eff_rule = get_data_validation_rule(self.sheet, 'A1')
+        self.assertEqual(eff_rule, None)
+        # data validation for A2 should be equal to validation_rule
+        eff_rule = get_data_validation_rule(self.sheet, 'A2')
+        self.assertEqual(eff_rule.condition.type, 'ONE_OF_LIST')
+        self.assertEqual([ x.userEnteredValue for x in eff_rule.condition.values ], ['1', '2', '3', '4'])
+        self.assertEqual(eff_rule.showCustomUi, True)
+        self.assertEqual(eff_rule.strict, None)
+        self.assertEqual(eff_rule, validation_rule)
 
     def test_dataframe_formatter(self):
         rows = [  

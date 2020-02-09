@@ -1,0 +1,17 @@
+language: python
+cache: pip
+python:
+- '2.7'
+- '3.6'
+- '3.7'
+- '3.8'
+before_install:
+- openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
+  -in .travis.secrets.tar.gz.enc -out .travis.secrets.tar.gz -d
+- tar xvzf .travis.secrets.tar.gz
+install:
+- pip install -U pip
+- pip install -r requirements-test.txt
+- if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then pip install --only-binary -e .; else
+  pip install --prefer-binary -e .; fi
+script: python setup.py test

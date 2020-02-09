@@ -85,6 +85,37 @@ The following functions get or set "frozen" row or column counts for a worksheet
     set_frozen(worksheet, cols=1)
     set_frozen(worksheet, rows=1, cols=0)
 
+Getting and Setting Data Validation Rules for Cells and Cell Ranges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following functions get or set the "data validation rule" for a cell or cell range::
+
+    get_data_validation_rule(worksheet, label)
+    set_data_validation_for_cell_range(worksheet, range, rule)
+    set_data_validation_for_cell_ranges(worksheet, ranges)
+
+The full functionality of data validation rules is supported: all of ``BooleanCondition``. 
+See `the API documentation <https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/cells#DataValidationRule>`_
+for more information. Here's a short example::
+
+    validation_rule = DataValidationRule(
+        BooleanCondition('ONE_OF_LIST', ['1', '2', '3', '4']),
+        showCustomUi=True
+    )
+    set_data_validation_for_cell_range(worksheet, 'A2:D2', validation_rule)
+    # No data validation for A1
+    eff_rule = get_data_validation_rule(worksheet, 'A1')
+    eff_rule.condition.type
+    >>> 'ONE_OF_LIST'
+    eff_rule.showCustomUi
+    >>> True
+
+Conditional Formatting Rules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Conditional formatting is not yet supported, although all of the necessary model objects have 
+been implemented and are included in this package.
+
 Formatting a Worksheet Using a Pandas DataFrame
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
