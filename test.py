@@ -51,7 +51,7 @@ def read_config():
     else:
         fp = open(CONFIG_FILENAME)
     try:
-        config.readfp(fp)
+        config.read_file(fp)
     finally:
         fp.close()
     return config

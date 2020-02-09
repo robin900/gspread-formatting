@@ -1,3 +1,4 @@
+/.travis.secrets.tar.gz
 /creds.json
 /tests.config
 
