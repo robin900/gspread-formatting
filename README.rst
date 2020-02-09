@@ -4,6 +4,9 @@ gspread-formatting
 .. image:: https://badge.fury.io/py/gspread-formatting.svg
     :target: https://badge.fury.io/py/gspread-formatting
 
+.. image:: https://travis-ci.org/robin900/gspread-formatting.svg?branch=master
+    :target: https://travis-ci.org/robin900/gspread-formatting
+
 This package provides complete support of basic cell formatting for Google spreadsheets
 to the popular ``gspread`` package, along with a few related features such as setting
 "frozen" rows and columns in a worksheet.
