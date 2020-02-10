@@ -271,6 +271,30 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_rule.strict, None)
         self.assertEqual(eff_rule, validation_rule)
 
+    def test_conditional_format_rules(self):
+        rows = [
+            ["A", "B", "C", "D"],
+            ["1", "2", "3", "4"]
+        ]
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+
+        current_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(list(current_rules), [])
+        new_rule = ConditionalFormatRule(
+            ranges=[GridRange.from_a1_range('A1:D1', self.sheet)],
+            booleanRule=BooleanRule(
+                condition=BooleanCondition('TEXT_CONTAINS', 'A'), 
+                format=CellFormat(textFormat=TextFormat(bold=True))
+            )
+        )
+        current_rules.append(new_rule)
+        current_rules.save()
+        fetched_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(list(fetched_rules), [new_rule])
+
     def test_dataframe_formatter(self):
         rows = [  
             {

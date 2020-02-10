@@ -104,8 +104,8 @@ class GridRange(FormattingComponent):
     _FIELDS = ('sheetId', 'startRowIndex', 'endRowIndex', 'startColumnIndex', 'endColumnIndex')
 
     @classmethod
-    def from_a1_range(cls, range):
-        return GridRange.from_props(_range_to_gridrange_object(range))
+    def from_a1_range(cls, range, worksheet):
+        return GridRange.from_props(_range_to_gridrange_object(range, worksheet.id))
 
     def __init__(self, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex):
         self.sheetId = sheetId

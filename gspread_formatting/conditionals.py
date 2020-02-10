@@ -3,11 +3,84 @@
 from .util import _parse_string_enum, _underlower, _enforce_type
 from .models import FormattingComponent, GridRange, _CLASSES
 
+import collections
+import collections.abc
+
+def get_conditional_format_rules(worksheet):
+    resp = worksheet.spreadsheet.fetch_sheet_metadata()
+    rules = []
+    for sheet in resp['sheets']:
+        if sheet['properties']['sheetId'] == worksheet.id:
+            rules = [ ConditionalFormatRule.from_props(p) for p in sheet.get('conditionalFormats', []) ]
+            break
+    return ConditionalFormatRules(worksheet, rules)
+
+def _make_delete_rule_request(worksheet, rule, ruleIndex):
+   return {
+       'deleteConditionalFormatRule': {
+           'sheetId': worksheet.id,
+           'index': ruleIndex
+       }
+   }
+
+def _make_add_rule_request(worksheet, rule, ruleIndex):
+   return {
+       'addConditionalFormatRule': {
+           'rule': rule.to_props(),
+           'index': ruleIndex
+       }
+   }
+
+class ConditionalFormatRules(collections.MutableSequence):
+    def __init__(self, worksheet, *rules):
+        self.worksheet = worksheet
+        if len(rules) == 1 and isinstance(rules[0], collections.Iterable):
+            rules = rules[0]
+        self.rules = list(rules)
+        self._original_rules = list(rules)
+
+    def __getitem__(self, idx):
+        return self.rules[idx]
+
+    def __setitem__(self, idx, value):
+        self.rules[idx] = value
+
+    def __delitem__(self, idx):
+        del self.rules[idx]
+
+    def __len__(self):
+        return len(self.rules)
+
+    def insert(self, idx, value):
+        return self.rules.insert(idx, value)
+
+    def save(self):
+        # ideally, we would determine the longest "increasing" subsequence
+        # between the original and new rule lists, then determine the add/upd/del
+        # operations to position the remaining items.
+        # But until I implement that correctly, we are just going to delete all rules
+        # and re-add them.
+        delete_requests = [ 
+            _make_delete_rule_request(self.worksheet, r, idx) for idx, r in enumerate(self._original_rules) 
+        ]
+        add_requests = [ 
+            _make_add_rule_request(self.worksheet, r, idx) for idx, r in enumerate(self.rules) 
+        ]
+        body = {
+            'requests': delete_requests + add_requests
+        }
+        return self.worksheet.spreadsheet.batch_update(body)
+
+
+        
 class ConditionalFormattingComponent(FormattingComponent):
     pass
 
 class BooleanRule(ConditionalFormattingComponent):
-    _FIELDS = ('condition', 'format')
+    _FIELDS = {
+        'condition': 'booleanCondition', 
+        'format': 'cellFormat'
+    }
 
     def __init__(self, condition, format):
         self.condition = condition
@@ -123,9 +196,9 @@ class ConditionalFormatRule(ConditionalFormattingComponent):
         self.gradientRule = _enforce_type("gradientRule", GradientRule, gradientRule, required=False)
         if len([x for x in (self.booleanRule, self.gradientRule) if x is not None]) != 1:
             raise ValueError("Must specify exactly one of: booleanRule, gradientRule")
-        # values are either GridRange objects or bare properties
+        # values are either GridRange objects or bare properties 
         self.ranges = [ 
-            v if isinstance(v, GridRange) else GridRange.from_props(v) 
+            v if isinstance(v, GridRange) else GridRange.from_props(v)
             for v in ranges 
         ]
 
