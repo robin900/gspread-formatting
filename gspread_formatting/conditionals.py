@@ -87,6 +87,27 @@ class BooleanRule(ConditionalFormattingComponent):
         self.format = format
 
 class BooleanCondition(ConditionalFormattingComponent):
+
+    illegal_types_for_data_validation = { 
+        'TEXT_STARTS_WITH', 
+        'TEXT_ENDS_WITH', 
+        'BLANK', 
+        'NOT_BLANK' 
+    }
+
+    illegal_types_for_conditional_formatting = { 
+        'TEXT_IS_EMAIL',
+        'TEXT_IS_URL',
+        'DATE_ON_OR_BEFORE',
+        'DATE_ON_OR_AFTER',
+        'DATE_BETWEEN',
+        'DATE_NOT_BETWEEN',
+        'DATE_IS_VALID',
+        'ONE_OF_RANGE',
+        'ONE_OF_LIST'
+        'BOOLEAN' 
+    }
+
     _FIELDS = ('type', 'values')
 
     TYPES = {
@@ -193,6 +214,12 @@ class ConditionalFormatRule(ConditionalFormattingComponent):
 
     def __init__(self, ranges, booleanRule=None, gradientRule=None):
         self.booleanRule = _enforce_type("booleanRule", BooleanRule, booleanRule, required=False)
+        if self.booleanRule:
+            if self.booleanRule.condition.type in BooleanCondition.illegal_types_for_conditional_formatting:
+                raise ValueError(
+                    "BooleanCondition.type for conditional formatting must not be one of: %s" % 
+                    BooleanCondition.illegal_types_for_conditional_formatting
+                )
         self.gradientRule = _enforce_type("gradientRule", GradientRule, gradientRule, required=False)
         if len([x for x in (self.booleanRule, self.gradientRule) if x is not None]) != 1:
             raise ValueError("Must specify exactly one of: booleanRule, gradientRule")
@@ -222,6 +249,11 @@ class DataValidationRule(FormattingComponent):
 
     def __init__(self, condition, inputMessage=None, strict=None, showCustomUi=None):
         self.condition = _enforce_type("condition", BooleanCondition, condition, True)
+        if self.condition.type in BooleanCondition.illegal_types_for_data_validation:
+            raise ValueError(
+                "BooleanCondition.type for data validation must not be one of: %s" % 
+                BooleanCondition.illegal_types_for_data_validation
+            )
         self.inputMessage = _enforce_type("inputMessage", str, inputMessage, False)
         self.strict = _enforce_type("strict", bool, strict, False)
         self.showCustomUi = _enforce_type("showCustomUi", bool, showCustomUi, False)
