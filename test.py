@@ -290,10 +290,22 @@ class WorksheetTest(GspreadTest):
                 format=CellFormat(textFormat=TextFormat(bold=True))
             )
         )
+        new_rule_2 = ConditionalFormatRule(
+            ranges=[GridRange.from_a1_range('A2:D2', self.sheet)],
+            booleanRule=BooleanRule(
+                condition=BooleanCondition('NUMBER_GREATER_THAN_EQ', '1'), 
+                format=CellFormat(textFormat=TextFormat(italic=True))
+            )
+        )
         current_rules.append(new_rule)
+        current_rules.append(new_rule_2)
         current_rules.save()
-        fetched_rules = get_conditional_format_rules(self.sheet)
-        self.assertEqual(list(fetched_rules), [new_rule])
+        current_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(list(current_rules), [new_rule, new_rule_2])
+        current_rules.clear()
+        current_rules.save()
+        current_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(list(current_rules), [])
 
     def test_dataframe_formatter(self):
         rows = [  

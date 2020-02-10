@@ -63,9 +63,13 @@ class ConditionalFormatRules(MutableSequence):
         delete_requests = [ 
             _make_delete_rule_request(self.worksheet, r, idx) for idx, r in enumerate(self._original_rules) 
         ]
+        # want to delete from highest index to lowest...
+        delete_requests.reverse()
         add_requests = [ 
             _make_add_rule_request(self.worksheet, r, idx) for idx, r in enumerate(self.rules) 
         ]
+        if not delete_requests and not add_requests:
+            return
         body = {
             'requests': delete_requests + add_requests
         }
