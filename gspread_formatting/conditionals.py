@@ -51,6 +51,10 @@ class ConditionalFormatRules(MutableSequence):
     def __len__(self):
         return len(self.rules)
 
+    # py2.7 MutableSequence does not offer clear()
+    def clear(self):
+        del self.rules[:]
+
     def insert(self, idx, value):
         return self.rules.insert(idx, value)
 
