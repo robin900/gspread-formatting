@@ -3,11 +3,8 @@
 from .util import _parse_string_enum, _underlower, _enforce_type
 from .models import FormattingComponent, GridRange, _CLASSES
 
-# 2-and-3 compatibility
-try:
-    from collections.abc import MutableSequence, Iterable
-except ImportError:
-    from collections import MutableSequence, Iterable
+from collections import MutableSequence, Iterable
+
 
 def get_conditional_format_rules(worksheet):
     resp = worksheet.spreadsheet.fetch_sheet_metadata()
