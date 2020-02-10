@@ -302,6 +302,15 @@ class WorksheetTest(GspreadTest):
         current_rules.save()
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(list(current_rules), [new_rule, new_rule_2])
+
+        bold_fmt = get_effective_format(self.sheet, 'A1')
+        italic_fmt = get_effective_format(self.sheet, 'C2')
+        normal_fmt = get_effective_format(self.sheet, 'C1')
+        self.assertEqual(bold_fmt.textFormat.bold, True)
+        self.assertEqual(italic_fmt.textFormat.italic, True)
+        self.assertEqual(bool(normal_fmt.textFormat.bold), False)
+        self.assertEqual(bool(normal_fmt.textFormat.italic), False)
+
         current_rules.clear()
         current_rules.save()
         current_rules = get_conditional_format_rules(self.sheet)
