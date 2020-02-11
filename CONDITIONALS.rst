@@ -36,3 +36,7 @@ is numeric and greater than 100::
     rules.append(rule)
     rules.save()
 
+An important note: A ``ConditionalFormatRule`` is, like all other objects provided by this package,
+mutable in all of its fields. Mutating a ``ConditionalFormatRule`` object in place will not automatically
+store the changes via the Sheets API; but calling `.save()` on the list-like rules object will store
+the mutated rule as expected.
