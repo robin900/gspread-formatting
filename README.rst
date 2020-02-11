@@ -106,18 +106,21 @@ for more information. Here's a short example::
         showCustomUi=True
     )
     set_data_validation_for_cell_range(worksheet, 'A2:D2', validation_rule)
-    # No data validation for A1
-    eff_rule = get_data_validation_rule(worksheet, 'A1')
+    # data validation for A2
+    eff_rule = get_data_validation_rule(worksheet, 'A2')
     eff_rule.condition.type
     >>> 'ONE_OF_LIST'
     eff_rule.showCustomUi
     >>> True
+    # No data validation for A1
+    eff_rule = get_data_validation_rule(worksheet, 'A1')
+    eff_rule
+    >>> None
 
 Conditional Formatting Rules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Conditional formatting is not yet supported, although all of the necessary model objects have 
-been implemented and are included in this package.
+Conditional format rules are supported by this package! See the `Conditional Format Rules docs <./CONDITIONALS.rst>`_.
 
 Formatting a Worksheet Using a Pandas DataFrame
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
