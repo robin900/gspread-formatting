@@ -5,7 +5,7 @@ A conditional format rule allows you to specify a cell format that (additively) 
 only when the value of the cell meets a certain condition. 
 The `ConditionalFormatRule documentation <https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/sheets#ConditionalFormatRule>`_ for the Sheets API describes the two kinds of rules allowed:
 a ``BooleanRule`` in which the `CellFormat` is applied to the cell if the value meets the specified boolean
-condition; or a `GradientRule` in which the `Color` or `ColorStyle` of the cell varies depending on the numeric
+condition; or a ``GradientRule`` in which the ``Color`` or ``ColorStyle`` of the cell varies depending on the numeric
 value of the cell or cells. 
 
 You can specify multiple rules for each worksheet present in a Google spreadsheet. To add or remove rules,
