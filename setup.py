@@ -23,7 +23,7 @@ setup(
     name='gspread-formatting',
     version=VERSION,
     packages=['gspread_formatting'],
-    package_data={'': ['*.rst']}
+    package_data={'': ['*.rst']},
     test_suite='test',
     install_requires=[
         'gspread>=3.0.0' 
