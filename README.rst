@@ -55,6 +55,23 @@ all in one function call and Sheets API operation::
 
     format_cell_ranges(worksheet, [('A1:J1', fmt), ('K1:K200', fmt2)])
 
+Specifying Cell Ranges
+~~~~~~~~~~~~~~~~~~~~~~
+
+The `format_cell_range` function and friends allow a string to specify a cell range using the "A1" convention
+to name a column-and-row cell address with column letter and row number; in addition, one may specify
+an entire column or column range with unbounded rows, or an entire row or row range with unbounded columns,
+or a combination thereof. Here are some examples::
+
+    A1     # column A row 1
+    A1:A2  # column A, rows 1-2
+    A:A    # entire column A, rows unbounded
+    A:C    # entire columns A through C
+    A:B100 # columns A and B, unbounded start through row 100
+    1:3    # entire rows 1 through 3, all columns
+    1      # entire row 1
+
+
 Retrieving, Comparing, and Composing CellFormats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

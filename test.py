@@ -26,6 +26,7 @@ import gspread
 from gspread import utils
 from gspread_formatting import *
 from gspread_formatting.dataframe import *
+from gspread_formatting.util import _range_to_gridrange_object
 
 try:
     unicode
@@ -74,6 +75,39 @@ def gen_value(prefix=None):
     else:
         return unicode(uuid.uuid4())
 
+
+class RangeConversionTest(unittest.TestCase):
+    RANGES = {
+        'A': {'startColumnIndex': 0, 'endColumnIndex': 1},
+        'A:C': {'startColumnIndex': 0, 'endColumnIndex': 3},
+        'A5:B': {'startRowIndex': 4, 'startColumnIndex': 0, 'endColumnIndex': 2},
+        '3': {'startRowIndex': 2, 'endRowIndex': 3},
+        '3:100': {'startRowIndex': 2, 'endRowIndex': 100}
+    }
+
+    ILLEGAL_RANGES = (
+        'B:A',
+        'A100:A1',
+        'C1:A20',
+        'AA1:A1',
+        ''
+    )
+
+    def test_ranges(self):
+        worksheet_id = 0
+        for range, gridrange_obj in self.RANGES.items():
+            gridrange_obj['sheetId'] = worksheet_id
+            self.assertEqual(gridrange_obj, _range_to_gridrange_object(range, worksheet_id))
+        pass
+
+    def test_illegal_ranges(self):
+        for range in self.ILLEGAL_RANGES:
+            exc = None
+            try:
+                _range_to_gridrange_object(range, 0)
+            except Exception as e:
+                exc = e
+            self.assertTrue(isinstance(exc, ValueError))
 
 class GspreadTest(unittest.TestCase):
     config = None
