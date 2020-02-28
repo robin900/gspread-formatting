@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from gspread.utils import a1_to_rowcol as _a1_to_rowcol
-
 def _build_repeat_cell_request(worksheet, range, cell_format, celldata_field='userEnteredFormat'):
     return {
         'repeatCell': {
@@ -19,19 +17,52 @@ def _fetch_with_updated_properties(spreadsheet, key, params=None):
         spreadsheet._properties.update(metadata['properties'])
         return spreadsheet._properties[key]
 
+_RANGE_RE = re.compile(r"")
+_MAGIC_NUMBER = 64
+_CELL_ADDR_RE = re.compile(r'([A-Za-z]+)?([1-9]\d*)?')
+
+def _a1_to_rowcol(label):
+    if not label:
+        raise ValueError(label)
+    m = _CELL_ADDR_RE.match(label)
+    if m:
+        column_label = m.group(1).upper() if m.group(1) else None
+        row = int(m.group(2)) if m.group(2) else None
+
+        if column_label is not None:
+            col = 0
+            for i, c in enumerate(reversed(column_label)):
+                col += (ord(c) - _MAGIC_NUMBER) * (26 ** i)
+        else:
+            col = None
+        return (row, col)
+    raise ValueError(label)
+
+
 def _range_to_gridrange_object(range, worksheet_id):
+    start_col, 
     parts = range.split(':')
     start = parts[0]
     end = parts[1] if len(parts) > 1 else ''
     (row_offset, column_offset) = _a1_to_rowcol(start)
     (last_row, last_column) = _a1_to_rowcol(end) if end else (row_offset, column_offset)
-    return {
-        'sheetId': worksheet_id,
-        'startRowIndex': row_offset-1,
-        'endRowIndex': last_row,
-        'startColumnIndex': column_offset-1,
-        'endColumnIndex': last_column
+    # check for illegal ranges
+    if (row_offset is not None and last_row is not None and row_offset > last_row):
+        raise ValueError(range)
+    if (column_offset is not None and last_column is not None and column_offset > last_column):
+        raise ValueError(range)
+    obj = {
+        'sheetId': worksheet_id
     }
+    if row_offset is not None:
+        obj['startRowIndex'] = row_offset-1,
+    if last_row is not None:
+        obj['endRowIndex'] = last_row
+    if column_offset is not None:
+        obj['startColumnIndex'] = column_offset-1
+    if last_column is not None:
+        obj['endColumnIndex'] = last_column
+    return obj
 
 def _props_to_component(class_registry, class_alias, value, none_if_empty=False):
     if class_alias not in class_registry:
