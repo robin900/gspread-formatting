@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+v0.1.1 (2020-02-28)
+-------------------
+- Bare column row 14 (#15) [Robin Thomas]
+  Fixes #14 -- support range strings that are unbounded on row dimension
+  or column dimenstion.
+- Improve README intro and conditional docs text; attempt to include all
+  .rst in package so that PyPI and others can see the other doc files.
+  [Robin Thomas]
+
+
 v0.1.0 (2020-02-11)
 -------------------
 - Bump to 0.1.0 for conditional formatting rules release. [Robin Thomas]
