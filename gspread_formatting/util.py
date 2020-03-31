@@ -39,6 +39,27 @@ def _a1_to_rowcol(label):
     raise ValueError(label)
 
 
+def _range_to_dimensionrange_object(range, worksheet_id):
+    gridrange = _range_to_gridrange_object(range, worksheet_id)
+    is_row_range = ('startRowIndex' in gridrange or 'endRowIndex' in gridrange)
+    is_column_range = ('startColumnIndex' in gridrange or 'endColumnIndex' in gridrange)
+    if is_row_range and is_column_range:
+        raise ValueError("Range for dimension must specify only column(s) or only row(s), not both: %s" % range)
+    obj = { 'sheetId': worksheet_id }
+    if is_row_range:
+        obj['dimension'] = 'ROWS'
+        if 'endRowIndex' in gridrange:
+            obj['endIndex'] = gridrange['endRowIndex']
+        if 'startRowIndex' in gridrange:
+            obj['startIndex'] = gridrange['startRowIndex']
+    if is_column_range:
+        obj['dimension'] = 'COLUMNS'
+        if 'endColumnIndex' in gridrange:
+            obj['endIndex'] = gridrange['endColumnIndex']
+        if 'startColumnIndex' in gridrange:
+            obj['startIndex'] = gridrange['startColumnIndex']
+    return obj
+
 def _range_to_gridrange_object(range, worksheet_id):
     parts = range.split(':')
     start = parts[0]

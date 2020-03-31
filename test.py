@@ -26,7 +26,7 @@ import gspread
 from gspread import utils
 from gspread_formatting import *
 from gspread_formatting.dataframe import *
-from gspread_formatting.util import _range_to_gridrange_object
+from gspread_formatting.util import _range_to_gridrange_object, _range_to_dimensionrange_object
 
 try:
     unicode
@@ -93,6 +93,15 @@ class RangeConversionTest(unittest.TestCase):
         ''
     )
 
+    DIMENSION_RANGES = {
+        'A': {'dimension': 'COLUMNS', 'startIndex': 0, 'endIndex': 1},
+        'A:C': {'dimension': 'COLUMNS', 'startIndex': 0, 'endIndex': 3},
+        '3': {'dimension': 'ROWS', 'startIndex': 2, 'endIndex': 3},
+        '3:100': {'dimension': 'ROWS', 'startIndex': 2, 'endIndex': 100}
+    }
+
+    ILLEGAL_DIMENSION_RANGES = ( 'A5:B', '1:C3', 'A1:D5' )
+
     def test_ranges(self):
         worksheet_id = 0
         for range, gridrange_obj in self.RANGES.items():
@@ -105,6 +114,22 @@ class RangeConversionTest(unittest.TestCase):
             exc = None
             try:
                 _range_to_gridrange_object(range, 0)
+            except Exception as e:
+                exc = e
+            self.assertTrue(isinstance(exc, ValueError))
+
+    def test_dimension_ranges(self):
+        worksheet_id = 0
+        for range, range_obj in self.DIMENSION_RANGES.items():
+            range_obj['sheetId'] = worksheet_id
+            self.assertEqual(range_obj, _range_to_dimensionrange_object(range, worksheet_id))
+        pass
+
+    def test_illegal_dimension_ranges(self):
+        for range in self.ILLEGAL_DIMENSION_RANGES:
+            exc = None
+            try:
+                _range_to_dimensionrange_object(range, 0)
             except Exception as e:
                 exc = e
             self.assertTrue(isinstance(exc, ValueError))
@@ -421,5 +446,18 @@ class WorksheetTest(GspreadTest):
                 self.assertTrue(actual_uef & expected_uef == expected_uef)
         self.assertEqual(1, get_frozen_row_count(self.sheet))
         self.assertEqual(1, get_frozen_column_count(self.sheet))
+
+    def test_row_height_and_column_width(self):
+        set_row_height(self.sheet, '1:5', 42)
+        set_column_width(self.sheet, 'A', 187)
+        metadata = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': 'true'})
+        sheet_md = [ s for s in metadata['sheets'] if s['properties']['sheetId'] == self.sheet.id ][0]
+        row_md = sheet_md['data'][0]['rowMetadata']
+        col_md = sheet_md['data'][0]['columnMetadata']
+        for row in row_md[0:4]:
+            self.assertEqual(42, row['pixelSize'])
+        for col in col_md[0:1]:
+            self.assertEqual(187, col['pixelSize'])
+
 
 

@@ -65,9 +65,11 @@ or a combination thereof. Here are some examples::
 
     A1     # column A row 1
     A1:A2  # column A, rows 1-2
+    A      # entire column A, rows unbounded
     A:A    # entire column A, rows unbounded
     A:C    # entire columns A through C
     A:B100 # columns A and B, unbounded start through row 100
+    A100:B # columns A and B, from row 100 with unbounded end 
     1:3    # entire rows 1 through 3, all columns
     1      # entire row 1
 
@@ -105,6 +107,18 @@ The following functions get or set "frozen" row or column counts for a worksheet
     set_frozen(worksheet, rows=1)
     set_frozen(worksheet, cols=1)
     set_frozen(worksheet, rows=1, cols=0)
+
+Setting Row Heights and Column Widths
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following functions set the height (in pixels) of rows or width (in pixels) of columns::
+
+    set_row_height(worksheet, 1, 42)
+    set_row_height(worksheet, '1:100', 42)
+    set_row_heights(worksheet, [ ('1:100', 42), ('101:', 22) ])
+    set_column_width(worksheet, 'A', 190)
+    set_column_width(worksheet, 'A:D', 100)
+    set_column_widths(worksheet, [ ('A', 200), ('B:', 100) ])
 
 Getting and Setting Data Validation Rules for Cells and Cell Ranges
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
