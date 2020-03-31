@@ -184,7 +184,7 @@ class WorksheetTest(GspreadTest):
         self.sheet.update_cells(cell_list)
 
         fmt = cellFormat(textFormat=textFormat(bold=True), backgroundColorStyle=ColorStyle(rgbColor=Color(1,0,0)))
-        format_cell_ranges(self.sheet, [('A1:B6', fmt), ('C1:D6', fmt)])
+        format_cell_ranges(self.sheet, [('A:A', fmt), ('B1:B6', fmt), ('C1:D6', fmt), ('2', fmt)])
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
         self.assertEqual(ue_fmt.textFormat.bold, True)
         # userEnteredFormat will not have backgroundColorStyle...
@@ -194,7 +194,7 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_fmt.backgroundColorStyle.rgbColor.red, 1)
         self.assertEqual(eff_fmt.textFormat.bold, True)
         fmt2 = cellFormat(textFormat=textFormat(italic=True))
-        format_cell_range(self.sheet, 'A1:D6', fmt2)
+        format_cell_range(self.sheet, 'A:D', fmt2)
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
         self.assertEqual(ue_fmt.textFormat.italic, True)
         eff_fmt = get_effective_format(self.sheet, 'A1')
