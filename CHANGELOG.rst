@@ -2,11 +2,22 @@ Changelog
 =========
 
 
+v0.2.0 (2020-03-31)
+-------------------
+- Fixes #10 (support setting row height or column width). [Robin Thomas]
+- Added unbounded col and row ranges in format_cell_ranges test to
+  ensure that formatting calls (not just _range_to_gridrange_object)
+  succeed. [Robin Thomas]
+
+
 v0.1.1 (2020-02-28)
 -------------------
+- Bump to v0.1.1. [Robin Thomas]
 - Bare column row 14 (#15) [Robin Thomas]
+
   Fixes #14 -- support range strings that are unbounded on row dimension
   or column dimenstion.
+- Oops typo. [Robin Thomas]
 - Improve README intro and conditional docs text; attempt to include all
   .rst in package so that PyPI and others can see the other doc files.
   [Robin Thomas]
