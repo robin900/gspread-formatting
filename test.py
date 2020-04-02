@@ -378,6 +378,8 @@ class WorksheetTest(GspreadTest):
     def test_dataframe_formatter(self):
         rows = [  
             {
+                'i': i,
+                'j': i * 2,
                 'A': 'Label ' + str(i), 
                 'B': i * 100 + 2.34, 
                 'C': date(2019, 3, i % 31 + 1), 
@@ -386,7 +388,7 @@ class WorksheetTest(GspreadTest):
             } 
             for i in range(200) 
         ]
-        df = pd.DataFrame.from_records(rows)
+        df = pd.DataFrame.from_records(rows, index=['i', 'j'])
         set_with_dataframe(self.sheet, df, include_index=True)
         format_with_dataframe(
             self.sheet, 
@@ -407,17 +409,18 @@ class WorksheetTest(GspreadTest):
             include_index=True,
         )
         for cell_range, expected_uef in [
-            ('A1:A201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
-            ('B1:B201', cellFormat(horizontalAlignment='CENTER')), 
-            ('C1:C201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
-            ('D1:D201', 
+            ('A2:A201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
+            ('B2:B201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
+            ('C2:C201', cellFormat(horizontalAlignment='CENTER')), 
+            ('D2:D201', cellFormat(numberFormat=numberFormat(type='NUMBER'), horizontalAlignment='RIGHT')), 
+            ('E2:E201', 
                 cellFormat(
                     numberFormat=numberFormat(type='DATE', pattern='yyyy mmmmmm dd'), 
                     horizontalAlignment='CENTER'
                 )
             ), 
-            ('E1:E201', cellFormat(numberFormat=numberFormat(type='DATE'), horizontalAlignment='CENTER')), 
-            ('F1:F201', 
+            ('F2:F201', cellFormat(numberFormat=numberFormat(type='DATE'), horizontalAlignment='CENTER')), 
+            ('G2:G201', 
                 cellFormat(
                     numberFormat=numberFormat(
                         type='NUMBER', 
@@ -426,13 +429,13 @@ class WorksheetTest(GspreadTest):
                     horizontalAlignment='CENTER'
                 )
             ), 
-            ('A1:A201', 
+            ('A1:B201', 
                 cellFormat(
                     backgroundColor=DEFAULT_HEADER_BACKGROUND_COLOR,
                     textFormat=textFormat(bold=True)
                 )
             ), 
-            ('A1:F1', 
+            ('A1:G1', 
                 cellFormat(
                     backgroundColor=DEFAULT_HEADER_BACKGROUND_COLOR,
                     textFormat=textFormat(bold=True)
@@ -443,9 +446,12 @@ class WorksheetTest(GspreadTest):
             for cell in (start_cell, end_cell):
                 actual_uef = get_user_entered_format(self.sheet, cell)
                 # actual_uef must be a superset of expected_uef
-                self.assertTrue(actual_uef & expected_uef == expected_uef)
+                self.assertTrue(
+                    actual_uef & expected_uef == expected_uef, 
+                    "%s range expected format %s, got %s" % (cell_range, expected_uef, actual_uef)
+                )
         self.assertEqual(1, get_frozen_row_count(self.sheet))
-        self.assertEqual(1, get_frozen_column_count(self.sheet))
+        self.assertEqual(2, get_frozen_column_count(self.sheet))
 
     def test_row_height_and_column_width(self):
         set_row_height(self.sheet, '1:5', 42)

@@ -18,6 +18,11 @@ __all__ = (
 
 DEFAULT_HEADER_BACKGROUND_COLOR = Color(0.8980392, 0.8980392, 0.8980392)
 
+def _determine_index_or_columns_size(obj):
+    if hasattr(obj, 'levshape'):
+        return len(obj.levshape)
+    return 1
+        
 def format_with_dataframe(worksheet,
                           dataframe,
                           formatter=None,
@@ -53,8 +58,17 @@ def format_with_dataframe(worksheet,
     formatting_ranges = []
 
     columns = [ dataframe[c] for c in dataframe.columns ]
+    index_column_size = _determine_index_or_columns_size(dataframe.index)
+    column_header_size = _determine_index_or_columns_size(dataframe.columns)
+
     if include_index:
-        columns = [ dataframe.index ] + columns
+        # allow for multi-index index
+        if index_column_size > 1:
+            reset_df = dataframe.reset_index()
+            index_elts = [ reset_df[c] for c in list(reset_df.columns)[:index_column_size] ]
+        else:
+            index_elts = [ dataframe.index ]
+        columns = index_elts + columns
 
     for idx, column in enumerate(columns):
         column_fmt = formatter.format_for_column(column, col + idx, dataframe)
@@ -67,16 +81,22 @@ def format_with_dataframe(worksheet,
         formatting_ranges.append( (range, column_fmt) )
 
     if include_column_header:
+        # TODO allow for multi-index columns object
         elts = list(dataframe.columns)
         if include_index:
-            elts = [ dataframe.index.name ] + elts
+            # allow for multi-index index
+            if index_column_size > 1:
+                index_names = list(dataframe.index.names)
+            else:
+                index_names = [ dataframe.index.name ]
+            elts = index_names + elts
             header_fmt = formatter.format_for_header(dataframe.index, dataframe)
             if header_fmt:
                 formatting_ranges.append( 
                     (
                         '{}:{}'.format(
                             rowcol_to_a1(row, col), 
-                            rowcol_to_a1(row + dataframe.shape[0], col)
+                            rowcol_to_a1(row + dataframe.shape[0], col + index_column_size - 1)
                         ), 
                         header_fmt
                     )
@@ -88,7 +108,7 @@ def format_with_dataframe(worksheet,
                 (
                     '{}:{}'.format(
                         rowcol_to_a1(row, col), 
-                        rowcol_to_a1(row, col + dataframe.shape[1])
+                        rowcol_to_a1(row + column_header_size - 1, col + len(elts) - 1)
                     ), 
                     header_fmt
                 )
@@ -97,18 +117,22 @@ def format_with_dataframe(worksheet,
         freeze_args = {}
 
         if row == 1 and formatter.should_freeze_header(elts, dataframe):
-            freeze_args['rows'] = 1
+            freeze_args['rows'] = column_header_size
 
         if include_index and col == 1 and formatter.should_freeze_header(dataframe.index, dataframe):
-            freeze_args['cols'] = 1
+            freeze_args['cols'] = index_column_size
 
-        row += 1
+        row += column_header_size
 
 
     values = []
     for value_row, index_value in zip_longest(dataframe.values, dataframe.index):
         if include_index:
-            value_row = [index_value] + list(value_row)
+            if index_column_size > 1:
+                index_values = list(index_value)
+            else:
+                index_values = [index_value]
+            value_row = index_values + list(value_row)
         values.append(value_row)
     for y_idx, value_row in enumerate(values):
         for x_idx, cell_value in enumerate(value_row):
