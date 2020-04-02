@@ -2,8 +2,18 @@ Changelog
 =========
 
 
+v0.2.1 (2020-04-02)
+-------------------
+- Bump to v0.2.1. [Robin Thomas]
+- Added support in DataFrame formatting for MultiIndex, either as index
+  or as the columns object of the DataFrame. [Robin Thomas]
+- Added docs/ to start sphinx autodoc generation. [Robin Thomas]
+- Add wheel dep for bdist_wheel support. [Robin Thomas]
+
+
 v0.2.0 (2020-03-31)
 -------------------
+- Bump to v0.2.0. [Robin Thomas]
 - Fixes #10 (support setting row height or column width). [Robin Thomas]
 - Added unbounded col and row ranges in format_cell_ranges test to
   ensure that formatting calls (not just _range_to_gridrange_object)
