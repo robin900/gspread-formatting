@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+v0.2.2 (2020-04-19)
+-------------------
+- Bump to v0.2.2. [Robin Thomas]
+- Add MANIFEST.in to add VERSION file to sdist. [Robin Thomas]
+
+
 v0.2.1 (2020-04-02)
 -------------------
 - Bump to v0.2.1. [Robin Thomas]
