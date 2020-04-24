@@ -2,6 +2,8 @@
 
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
+
+from math import floor
                   
 class FormattingComponent(object):
     _FIELDS = ()
@@ -192,6 +194,14 @@ class Color(CellFormatComponent):
         self.green = green
         self.blue = blue
         self.alpha = alpha
+
+    def toHex():
+        # This would simpler if the default was 0 instead of None
+        RR = format(floor((self.red if self.red else 0) * 255), 'x')
+        GG = format(floor((self.green if self.green else 0) * 255), 'x')
+        BB = format(floor((self.blue if self.blue else 0) * 255), 'x')
+        hexformat = f'#{RR}{GG}{BB}'
+        return hexformat
 
 class Border(CellFormatComponent):
     _FIELDS = ('style', 'color', 'colorStyle')
