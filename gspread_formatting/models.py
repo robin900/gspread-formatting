@@ -2,8 +2,6 @@
 
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
-
-from math import floor
                   
 class FormattingComponent(object):
     _FIELDS = ()
@@ -189,29 +187,36 @@ class ColorStyle(CellFormatComponent):
 class Color(CellFormatComponent):
     _FIELDS = ('red', 'green', 'blue', 'alpha')
 
-    def __init__(self, red=None, green=None, blue=None, alpha=None, hexcolor=None):
+    def __init__(self, red=None, green=None, blue=None, alpha=None):
         self.red = red
         self.green = green
         self.blue = blue
         self.alpha = alpha
-        if hexcolor:
-            self.fromHex(hexcolor)
+
+    @classmethod
+    def fromHex(cls,hexcolor):
+        # Convert Hex range 0-255 to 0-1.0
+        RR = int(hexcolor[1:3],16) / 255
+        GG = int(hexcolor[3:5],16) / 255
+        BB = int(hexcolor[5:7],16) / 255
+        # Slices wont causes IndexErrors
+        A = hexcolor[7:9]
+        if A is '':
+            AA = None
+        else:
+            AA = int(A,16) / 255
+        return cls(RR,GG,BB,AA)
 
     def toHex(self):
-        # Dont worry about alpha channel yet
-        # This would simpler if the default was 0 instead of None
-        RR = format(floor((self.red if self.red else 0) * 255), '02x')
-        GG = format(floor((self.green if self.green else 0) * 255), '02x')
-        BB = format(floor((self.blue if self.blue else 0) * 255), '02x')
-        hexformat = f'#{RR}{GG}{BB}'
+        RR = format(int((self.red if self.red else 0) * 255), '02x')
+        GG = format(int((self.green if self.green else 0) * 255), '02x')
+        BB = format(int((self.blue if self.blue else 0) * 255), '02x')
+        AA = format(int((self.alpha if self.alpha else 0) * 255), '02x')
+        if self.alpha:
+            hexformat = f'#{RR}{GG}{BB}{AA}'
+        else:
+            hexformat = f'#{RR}{GG}{BB}'
         return hexformat
-
-    def fromHex(self,hexcolor):
-        # Dont worry about alpha channel yet
-        self.red = int(hexcolor[1:3],16) / 255
-        self.green = int(hexcolor[3:5],16) / 255
-        self.blue = int(hexcolor[5:7],16) / 255
-
 
 class Border(CellFormatComponent):
     _FIELDS = ('style', 'color', 'colorStyle')
