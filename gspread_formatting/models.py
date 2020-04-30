@@ -195,13 +195,25 @@ class Color(CellFormatComponent):
 
     @classmethod
     def fromHex(cls,hexcolor):
+        # Check Hex String
+        if not hexcolor.startswith('#'):
+            raise ValueError(f'Color string given: {hexcolor}: Hex color strings must start with #')
+        hexlen = len(hexcolor)
+        if hexlen != 7 and hexlen != 9:
+            raise ValueError(f'Color string given: {hexcolor}: Hex string must be of the form: "#RRGGBB" or "#RRGGBBAA')
+        # Remainder of string should be parsable as hex
+        try:
+            if int(hexcolor[1:],16):
+                pass
+        except Exception as e:
+            raise ValueError(f'Color string given: {hexcolor}: Bad color string entered')
         # Convert Hex range 0-255 to 0-1.0
         RR = int(hexcolor[1:3],16) / 255
         GG = int(hexcolor[3:5],16) / 255
         BB = int(hexcolor[5:7],16) / 255
         # Slices wont causes IndexErrors
         A = hexcolor[7:9]
-        if A is '':
+        if not A:
             AA = None
         else:
             AA = int(A,16) / 255
@@ -212,7 +224,8 @@ class Color(CellFormatComponent):
         GG = format(int((self.green if self.green else 0) * 255), '02x')
         BB = format(int((self.blue if self.blue else 0) * 255), '02x')
         AA = format(int((self.alpha if self.alpha else 0) * 255), '02x')
-        if self.alpha:
+
+        if self.alpha != None:
             hexformat = f'#{RR}{GG}{BB}{AA}'
         else:
             hexformat = f'#{RR}{GG}{BB}'

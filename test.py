@@ -465,5 +465,26 @@ class WorksheetTest(GspreadTest):
         for col in col_md[0:1]:
             self.assertEqual(187, col['pixelSize'])
 
+class ColorTest(unittest.TestCase):
+
+    SAMPLE_HEXSTRINGS_NOALPHA = ['#230ac7','#9ec08b','#037778','#134d70','#f1f974','#0997b6','#42da14','#be5ee8']
+    SAMPLE_HEXSTRINGS_ALPHA = ['#b7d90600','#0a29f321','#33db6a48','#4134a467','#7d172388','#58fe5fa1','#2ea14ecc','#c18de9f8']
+    SAMPLE_HEXSTRING_CAPS = ['#DDEEFF','#EEFFAABB','#1A2B3C4E','#A1F2B3']
+    # [NO_POUND_SIGN, NO_POUND_SIGN_ALPHA, INVALID_HEX_CHAR, INVALID_HEX_CHAR_ALPHA, SPECIAL_INVALID_CHAR, TOO_FEW_CHARS, TOO_MANY_CHARS]
+    SAMPLE_HEXSTRINGS_BAD = ['230ac7','9ec08b9b','#Adbeye','#1122ccgg','#11$100FF', '#11678','#867530910']
+
+    def test_color_roundtrip(self):
+        for hexstring in self.SAMPLE_HEXSTRINGS_NOALPHA:
+            self.assertEqual(hexstring, Color.fromHex(hexstring).toHex())
+        for hexstring in self.SAMPLE_HEXSTRINGS_ALPHA:
+            self.assertEqual(hexstring, Color.fromHex(hexstring).toHex())
+        for hexstring in self.SAMPLE_HEXSTRING_CAPS:
+            # Check equality with lowercase version of string
+            self.assertEqual(hexstring.lower(), Color.fromHex(hexstring).toHex())
+
+    def test_color_malformed(self):
+        for hexstring in self.SAMPLE_HEXSTRINGS_BAD:
+            with self.assertRaises(ValueError):
+                Color.fromHex(hexstring)
 
 
