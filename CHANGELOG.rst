@@ -2,6 +2,22 @@ Changelog
 =========
 
 
+v0.2.3 (2020-05-04)
+-------------------
+- Bump to v0.2.3. [Robin Thomas]
+
+- Color model import and export as hex color (#17) [Sam Korn]
+
+  * Add toHex function to Color model
+
+  * tohex and fromhex functions for Color model
+
+  * Use classmethod for hexstring constructor
+
+  * tests for hex colors, additional checks for malformed hex inputs
+- Results of check-manifest added to MANIFEST.in. [Robin Thomas]
+
+
 v0.2.2 (2020-04-19)
 -------------------
 - Bump to v0.2.2. [Robin Thomas]
