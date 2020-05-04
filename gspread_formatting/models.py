@@ -197,27 +197,27 @@ class Color(CellFormatComponent):
     def fromHex(cls,hexcolor):
         # Check Hex String
         if not hexcolor.startswith('#'):
-            raise ValueError(f'Color string given: {hexcolor}: Hex color strings must start with #')
+            raise ValueError('Color string given: %s: Hex color strings must start with #' % hexcolor)
         hexlen = len(hexcolor)
         if hexlen != 7 and hexlen != 9:
-            raise ValueError(f'Color string given: {hexcolor}: Hex string must be of the form: "#RRGGBB" or "#RRGGBBAA')
+            raise ValueError('Color string given: %s: Hex string must be of the form: "#RRGGBB" or "#RRGGBBAA' % hexcolor)
         # Remainder of string should be parsable as hex
         try:
             if int(hexcolor[1:],16):
                 pass
         except Exception as e:
-            raise ValueError(f'Color string given: {hexcolor}: Bad color string entered')
+            raise ValueError('Color string given: %s: Bad color string entered' % hexcolor)
         # Convert Hex range 0-255 to 0-1.0
-        RR = int(hexcolor[1:3],16) / 255
-        GG = int(hexcolor[3:5],16) / 255
-        BB = int(hexcolor[5:7],16) / 255
+        RR = int(hexcolor[1:3],16) / 255.0
+        GG = int(hexcolor[3:5],16) / 255.0
+        BB = int(hexcolor[5:7],16) / 255.0
         # Slices wont causes IndexErrors
         A = hexcolor[7:9]
         if not A:
             AA = None
         else:
-            AA = int(A,16) / 255
-        return cls(RR,GG,BB,AA)
+            AA = int(A,16) / 255.0
+        return cls(red=RR,green=GG,blue=BB,alpha=AA)
 
     def toHex(self):
         RR = format(int((self.red if self.red else 0) * 255), '02x')
@@ -226,9 +226,9 @@ class Color(CellFormatComponent):
         AA = format(int((self.alpha if self.alpha else 0) * 255), '02x')
 
         if self.alpha != None:
-            hexformat = f'#{RR}{GG}{BB}{AA}'
+            hexformat = '#{RR}{GG}{BB}{AA}'.format(RR=RR,GG=GG,BB=BB,AA=AA)
         else:
-            hexformat = f'#{RR}{GG}{BB}'
+            hexformat = '#{RR}{GG}{BB}'.format(RR=RR,GG=GG,BB=BB)
         return hexformat
 
 class Border(CellFormatComponent):
