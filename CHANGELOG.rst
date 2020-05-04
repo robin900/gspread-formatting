@@ -2,10 +2,15 @@ Changelog
 =========
 
 
+v0.2.4 (2020-05-04)
+-------------------
+- Bump to v0.2.4. [Robin Thomas]
+- Make new Color.fromHex() and toHex() 2.7-compatible. [Robin Thomas]
+
+
 v0.2.3 (2020-05-04)
 -------------------
 - Bump to v0.2.3. [Robin Thomas]
-
 - Color model import and export as hex color (#17) [Sam Korn]
 
   * Add toHex function to Color model
