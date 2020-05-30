@@ -7,6 +7,9 @@ gspread-formatting
 .. image:: https://travis-ci.org/robin900/gspread-formatting.svg?branch=master
     :target: https://travis-ci.org/robin900/gspread-formatting
 
+.. image:: https://img.shields.io/pypi/dm/gspread-formatting.svg
+    :target: https://pypi.org/project/gspread-formatting
+
 This package provides complete cell formatting for Google spreadsheets
 using the popular ``gspread`` package, along with a few related features such as setting
 "frozen" rows and columns in a worksheet. Both basic and conditional formatting operations
