@@ -77,7 +77,9 @@ class ConditionalFormatRules(MutableSequence):
         body = {
             'requests': delete_requests + add_requests
         }
-        return self.worksheet.spreadsheet.batch_update(body)
+        resp = self.worksheet.spreadsheet.batch_update(body)
+        self._original_rules = list(self.rules)
+        return resp
 
 
         

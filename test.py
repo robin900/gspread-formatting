@@ -358,9 +358,18 @@ class WorksheetTest(GspreadTest):
         )
         current_rules.append(new_rule)
         current_rules.append(new_rule_2)
-        current_rules.save()
+        self.assertNotEqual(current_rules.save(), None)
+        # re-saving _always_ sends a request to API, even if no local changes made
+        self.assertNotEqual(current_rules.save(), None)
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(list(current_rules), [new_rule, new_rule_2])
+        current_rules[0] = new_rule_2
+        del current_rules[1]
+        current_rules.append(new_rule)
+        self.assertEqual(list(current_rules), [new_rule_2, new_rule])
+        self.assertNotEqual(current_rules.save(), None)
+        current_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(list(current_rules), [new_rule_2, new_rule])
 
         bold_fmt = get_effective_format(self.sheet, 'A1')
         italic_fmt = get_effective_format(self.sheet, 'C2')
