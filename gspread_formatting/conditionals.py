@@ -3,7 +3,10 @@
 from .util import _parse_string_enum, _underlower, _enforce_type
 from .models import FormattingComponent, GridRange, _CLASSES
 
-from collections import MutableSequence, Iterable
+try:
+    from collections.abc import MutableSequence, Iterable
+except ImportError:
+    from collections import MutableSequence, Iterable
 
 
 def get_conditional_format_rules(worksheet):
