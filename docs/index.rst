@@ -12,6 +12,8 @@ Welcome to gspread-dataframe's documentation!
 
 .. include:: ../README.rst
 
+.. include:: ../CONDITIONALS.rst
+
 Module Documentation - Version |version|
 ----------------------------------------
 
