@@ -308,9 +308,11 @@ class WorksheetTest(GspreadTest):
     def test_data_validation_rule(self):
         rows = [
             ["A", "B", "C", "D"],
-            ["1", "2", "3", "4"]
+            ["1", "2", "3", "4"],
+            ["A", "B", "C", "D"],
+            ["TRUE", "FALSE", "FALSE", "TRUE"],
         ]
-        cell_list = self.sheet.range('A1:D2')
+        cell_list = self.sheet.range('A1:D4')
         for cell, value in zip(cell_list, itertools.chain(*rows)):
             cell.value = value
         self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
@@ -329,6 +331,16 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_rule.showCustomUi, True)
         self.assertEqual(eff_rule.strict, None)
         self.assertEqual(eff_rule, validation_rule)
+
+        boolean_validation_rule = DataValidationRule(
+            BooleanCondition('BOOLEAN', [])
+        )
+        set_data_validation_for_cell_range(self.sheet, 'A4:D4', boolean_validation_rule)
+        eff_rule = get_data_validation_rule(self.sheet, 'A4')
+        self.assertEqual([ x.userEnteredValue for x in eff_rule.condition.values ], [])
+        self.assertEqual(eff_rule.showCustomUi, None)
+        self.assertEqual(eff_rule.strict, None)
+        self.assertEqual(eff_rule, boolean_validation_rule)
 
     def test_conditional_format_rules(self):
         rows = [

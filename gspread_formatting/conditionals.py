@@ -155,7 +155,7 @@ class BooleanCondition(ConditionalFormattingComponent):
         'BOOLEAN': (lambda x: isinstance(x, (list, tuple)) and len(x) >= 0 and len(x) <= 2)
     }
 
-    def __init__(self, type, values):
+    def __init__(self, type, values=()):
         self.type = _parse_string_enum("type", type, BooleanCondition.TYPES)
         validator = BooleanCondition.TYPES[self.type]
         valid = validator(values) if callable(validator) else len(values) == validator
