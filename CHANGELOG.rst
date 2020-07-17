@@ -2,6 +2,20 @@ Changelog
 =========
 
 
+v0.2.5 (2020-07-17)
+-------------------
+- Bump to version 0.2.5. [Robin Thomas]
+- Fixes #20: BooleanCondition objects returned by API endpoints may lack
+  a 'values' field instead of having a present 'values' field with an
+  empty list of values. Allow for this in BooleanCondition constructor.
+  Test coverage added for round-trip test of Boolean. [Robin Thomas]
+- Corrected version reference in sphinx docs. [Robin Thomas]
+- Removed 3.6, added 3.9-dev to travis build` [Robin Thomas]
+- Make collections.abc import 3.9-compatible. [Robin Thomas]
+- Preserve original conditional rules for effective replacement of rules
+  in one API call. [Robin Thomas]
+
+
 v0.2.4 (2020-05-04)
 -------------------
 - Bump to v0.2.4. [Robin Thomas]
