@@ -25,7 +25,7 @@ class SpreadsheetBatchUpdater(object):
 
     def execute(self):
         resps = self.spreadsheet.batch_update({'requests': self.requests})
-        self.requests.clear()
+        del self.requests[:]
         return resps
 
 def _wrap_for_batch_updater(func):
