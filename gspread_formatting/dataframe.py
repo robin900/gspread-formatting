@@ -5,8 +5,12 @@ try:
 except ImportError:
     from itertools import izip_longest as zip_longest
 
-from gspread_formatting import format_cell_ranges, cellFormat, numberFormat, Color, textFormat, set_frozen
+from gspread_formatting.batch_update_requests import format_cell_ranges, set_frozen
+from gspread_formatting.models import cellFormat, numberFormat, Color, textFormat
+
 from gspread.utils import rowcol_to_a1
+
+from functools import wraps
 
 __all__ = (
     'format_with_dataframe', 
@@ -23,7 +27,7 @@ def _determine_index_or_columns_size(obj):
         return len(obj.levshape)
     return 1
         
-def format_with_dataframe(worksheet,
+def _format_with_dataframe(worksheet,
                           dataframe,
                           formatter=None,
                           row=1,
@@ -151,12 +155,22 @@ def format_with_dataframe(worksheet,
                 )
             )
 
+    requests = []
+
     if formatting_ranges:
         formatting_ranges = [ r for r in formatting_ranges if r[1] and r[1].to_props() ]
-        format_cell_ranges(worksheet, formatting_ranges)
+        requests.extend(format_cell_ranges(worksheet, formatting_ranges))
 
     if freeze_args:
-        set_frozen(worksheet, **freeze_args)
+        requests.extend(set_frozen(worksheet, **freeze_args))
+
+    return requests
+
+@wraps(_format_with_dataframe)
+def format_with_dataframe(worksheet, *args, **kwargs):
+    return worksheet.spreadsheet.batch_update(
+        {'requests': _format_with_dataframe(worksheet, *args, **kwargs)}
+    )
 
 class DataFrameFormatter(object):
     """
