@@ -17,12 +17,6 @@ __all__ = (
     'set_column_width', 'set_column_widths'
 )
 
-def _wrap_as_standalone_function(func):
-    @wraps(func)
-    def f(worksheet, *args, **kwargs):
-        return worksheet.spreadsheet.batch_update({'requests': func(worksheet, *args, **kwargs)})
-    return f
-
 
 def set_row_heights(worksheet, ranges):
     """Update a row or range of rows in the given ``Worksheet`` 
