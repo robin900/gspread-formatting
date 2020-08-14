@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+v0.3.0 (2020-08-14)
+-------------------
+- Bump to version 0.3.0. [Robin Thomas]
+- Include pypy and pypy3 in travis builds. [Robin Thomas]
+- Add "batch updater" object (#21) [Robin Thomas]
+
+
 v0.2.5 (2020-07-17)
 -------------------
 - Bump to version 0.2.5. [Robin Thomas]
@@ -9,11 +16,17 @@ v0.2.5 (2020-07-17)
   a 'values' field instead of having a present 'values' field with an
   empty list of values. Allow for this in BooleanCondition constructor.
   Test coverage added for round-trip test of Boolean. [Robin Thomas]
+- Argh no 3.9-dev yet. [Robin Thomas]
 - Corrected version reference in sphinx docs. [Robin Thomas]
 - Removed 3.6, added 3.9-dev to travis build` [Robin Thomas]
 - Make collections.abc import 3.9-compatible. [Robin Thomas]
+- Use full version string in sphnix docs. [Robin Thomas]
+- Add docs badge to README. [Robin Thomas]
+- Fix title in index.rst. [Robin Thomas]
+- Try adding conditionals rst to docs. [Robin Thomas]
 - Preserve original conditional rules for effective replacement of rules
   in one API call. [Robin Thomas]
+- Add downloads badge. [Robin Thomas]
 
 
 v0.2.4 (2020-05-04)
