@@ -486,6 +486,34 @@ class WorksheetTest(GspreadTest):
         for col in col_md[0:1]:
             self.assertEqual(187, col['pixelSize'])
 
+    def test_row_height_and_column_width_batch(self):
+        with batch_updater(self.sheet.spreadsheet) as batch:
+            batch.set_row_height(self.sheet, '1:5', 42)
+            batch.set_column_width(self.sheet, 'A', 187)
+        metadata = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': 'true'})
+        sheet_md = [ s for s in metadata['sheets'] if s['properties']['sheetId'] == self.sheet.id ][0]
+        row_md = sheet_md['data'][0]['rowMetadata']
+        col_md = sheet_md['data'][0]['columnMetadata']
+        for row in row_md[0:4]:
+            self.assertEqual(42, row['pixelSize'])
+        for col in col_md[0:1]:
+            self.assertEqual(187, col['pixelSize'])
+
+    def test_batch_updater_context(self):
+        batch = batch_updater(self.sheet.spreadsheet)
+        batch.set_row_height(self.sheet, '1:5', 42)
+        batch.set_column_width(self.sheet, 'A', 187)
+        self.assertEqual(2, len(batch.requests))
+        try:
+            with batch:
+                batch.set_row_height(self.sheet, '1:5', 40)
+        except Exception as e:
+            self.assertIsInstance(e, IOError)
+        self.assertEqual(2, len(batch.requests))
+        batch.execute()
+        self.assertEqual(0, len(batch.requests))
+
+
 class ColorTest(unittest.TestCase):
 
     SAMPLE_HEXSTRINGS_NOALPHA = ['#230ac7','#9ec08b','#037778','#134d70','#f1f974','#0997b6','#42da14','#be5ee8']

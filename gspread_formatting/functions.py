@@ -3,143 +3,30 @@
 from .util import _build_repeat_cell_request, _fetch_with_updated_properties, _range_to_dimensionrange_object
 from .models import CellFormat
 from .conditionals import DataValidationRule
+import gspread_formatting.batch_update_requests
+
 from gspread.utils import a1_to_rowcol, rowcol_to_a1, finditem
 from gspread.models import Spreadsheet
 from gspread.urls import SPREADSHEET_URL
 
+from functools import wraps
+
 __all__ = (
-    'format_cell_ranges', 'format_cell_range', 
     'get_default_format', 'get_effective_format', 'get_user_entered_format',
-    'get_frozen_row_count', 'get_frozen_column_count', 'set_frozen',
-    'set_data_validation_for_cell_range', 'set_data_validation_for_cell_ranges',
+    'get_frozen_row_count', 'get_frozen_column_count', 
     'get_data_validation_rule',
-    'set_row_height', 'set_row_heights',
-    'set_column_width', 'set_column_widths'
-)
+) + gspread_formatting.batch_update_requests.__all__
 
-def set_row_heights(worksheet, ranges):
-    """Update a row or range of rows in the given ``Worksheet`` 
-    to have the specified height in pixels.
 
-    :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of:
-        a string with row range value in A1 notation, e.g. '1' or '1:50',
-        and a integer specifying height in pixels.
-    """
-    body = {
-        'requests': [
-            { 
-                'updateDimensionProperties': { 
-                    'range': _range_to_dimensionrange_object(range, worksheet.id), 
-                    'properties': { 'pixelSize': height }, 
-                    'fields': 'pixelSize' 
-                } 
-            }
-            for range, height in ranges
-        ]
-    }
-    return worksheet.spreadsheet.batch_update(body)
+def _wrap_as_standalone_function(func):
+    @wraps(func)
+    def f(worksheet, *args, **kwargs):
+        return worksheet.spreadsheet.batch_update({'requests': func(worksheet, *args, **kwargs)})
+    return f
 
-def set_row_height(worksheet, label, height):
-    """Update a row or range of rows in the given ``Worksheet`` 
-    to have the specified height in pixels.
+for _fname in gspread_formatting.batch_update_requests.__all__:
+    locals()[_fname] = _wrap_as_standalone_function(getattr(gspread_formatting.batch_update_requests, _fname))
 
-    :param worksheet: The ``Worksheet`` object.
-    :param label: string representing a single row or range of rows, e.g. ``1`` or ``3:400``.
-    :param height: An integer greater than or equal to 0.
-    """
-    return set_row_heights(worksheet, [(label, height)])
- 
-def set_column_widths(worksheet, ranges):
-    """Update a column or range of columns in the given ``Worksheet`` 
-    to have the specified width in pixels.
-
-    :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of:
-        a string with column range value in A1 notation, e.g. 'A:C',
-        and a integer specifying width in pixels.
-    """
-    body = {
-        'requests': [
-            { 
-                'updateDimensionProperties': { 
-                    'range': _range_to_dimensionrange_object(range, worksheet.id), 
-                    'properties': { 'pixelSize': width }, 
-                    'fields': 'pixelSize' 
-                } 
-            }
-            for range, width in ranges
-        ]
-    }
-    return worksheet.spreadsheet.batch_update(body)
-
-def set_column_width(worksheet, label, width):
-    """Update a column or range of columns in the given ``Worksheet`` 
-    to have the specified width in pixels.
-
-    :param worksheet: The ``Worksheet`` object.
-    :param label: string representing a single column or range of columns, e.g. ``A`` or ``B:D``.
-    :param height: An integer greater than or equal to 0.
-    """
-    return set_column_widths(worksheet, [(label, width)])
-      
-def format_cell_ranges(worksheet, ranges):
-    """Update a list of Cell object ranges of :class:`Cell` objects
-    in the given ``Worksheet`` to have the accompanying ``CellFormat``.
-
-    :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of:
-        a string with range value in A1 notation, e.g. 'A1:A5',
-        and a ``CellFormat`` object).
-    """
-
-    body = {
-        'requests': [
-            _build_repeat_cell_request(worksheet, range, cell_format)
-            for range, cell_format in ranges
-        ]
-    }
-
-    return worksheet.spreadsheet.batch_update(body)
-
-def format_cell_range(worksheet, name, cell_format):
-    """Update a range of :class:`Cell` objects in the given Worksheet
-    to have the specified ``CellFormat``.
-
-    :param worksheet: The ``Worksheet`` object.
-    :param name: A string with range value in A1 notation, e.g. 'A1:A5'.
-    :param cell_format: A ``CellFormat`` object.
-    """
-
-    return format_cell_ranges(worksheet, [(name, cell_format)])
-
-def set_data_validation_for_cell_ranges(worksheet, ranges):
-    """Update a list of Cell object ranges of :class:`Cell` objects
-    in the given ``Worksheet`` to have the accompanying ``DataValidationRule``.
-    :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are pairs of:
-        a string with range value in A1 notation, e.g. 'A1:A5',
-        and a ``DataValidationRule`` object).
-    """
-
-    body = {
-        'requests': [
-            _build_repeat_cell_request(worksheet, range, data_validation_rule, 'dataValidation')
-            for range, data_validation_rule in ranges
-        ]
-    }
-
-    return worksheet.spreadsheet.batch_update(body)
-
-def set_data_validation_for_cell_range(worksheet, range, rule):
-    """Update a list of Cell object ranges in the given ``Worksheet``
-    to have the accompanying ``DataValidationRule``.
-    :param worksheet: The ``Worksheet`` object.
-    :param range: A string with range value in A1 notation, e.g. 'A1:A5'.
-    :param rule: A DataValidationRule object.
-    """
-
-    return set_data_validation_for_cell_ranges(worksheet, [(range, rule)])
 
 def get_data_validation_rule(worksheet, label):
     """Returns a DataValidationRule object or None representing the
@@ -164,10 +51,12 @@ def get_data_validation_rule(worksheet, label):
     props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('dataValidation')
     return DataValidationRule.from_props(props) if props else None
 
+
 def get_default_format(spreadsheet):
     """Return Default CellFormat for spreadsheet, or None if no default formatting was specified."""
     fmt = _fetch_with_updated_properties(spreadsheet, 'defaultFormat')
     return CellFormat.from_props(fmt) if fmt else None
+
 
 def get_effective_format(worksheet, label):
     """Returns a CellFormat object or None representing the effective formatting directives,
@@ -194,6 +83,7 @@ def get_effective_format(worksheet, label):
     props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('effectiveFormat')
     return CellFormat.from_props(props) if props else None
 
+
 def get_user_entered_format(worksheet, label):
     """Returns a CellFormat object or None representing the user-entered formatting directives,
     if any, for the cell.
@@ -218,11 +108,13 @@ def get_user_entered_format(worksheet, label):
     props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('userEnteredFormat')
     return CellFormat.from_props(props) if props else None
 
+
 def get_frozen_row_count(worksheet):
     md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
     sheet_data = finditem(lambda i: i['properties']['title'] == worksheet.title, md['sheets'])
     grid_props = sheet_data['properties']['gridProperties']
     return grid_props.get('frozenRowCount')
+
 
 def get_frozen_column_count(worksheet):
     md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
@@ -230,29 +122,6 @@ def get_frozen_column_count(worksheet):
     grid_props = sheet_data['properties']['gridProperties']
     return grid_props.get('frozenColumnCount')
 
-def set_frozen(worksheet, rows=None, cols=None):
-    if rows is None and cols is None:
-        raise ValueError("Must specify at least one of rows and cols")
-    grid_properties = {}
-    if rows is not None:
-        grid_properties['frozenRowCount'] = rows
-    if cols is not None:
-        grid_properties['frozenColumnCount'] = cols
-    fields = ','.join(
-        'gridProperties.%s' % p for p in grid_properties.keys()
-    )
-    body = {
-        'requests': [{
-            'updateSheetProperties': {
-                'properties': {
-                    'sheetId': worksheet.id,
-                    'gridProperties': grid_properties
-                },
-                'fields': fields
-            }
-        }]
-    }
-    return worksheet.spreadsheet.batch_update(body)
 
 # monkey-patch Spreadsheet class
 
