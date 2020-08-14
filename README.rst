@@ -184,6 +184,32 @@ which will be used if no formatter object is provided to ``format_with_dataframe
 
     format_with_dataframe(worksheet, dataframe, formatter, include_index=False, include_column_header=True)
 
+
+Batch Mode for API Call Efficiency
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This package offers a "batch updater" object, with methods having the same names and parameters as the 
+formatting functions in the package. The batch updater will gather all formatting requests generated 
+by calling these methods, and send them all to the Google Sheets API in a single ``batchUpdate`` 
+request when ``.execute()`` is invoked on the batch updater. Alternately, you can use the batch updater
+as a context manager in a ``with:`` block, which will automate the call to ``.execute()``::
+
+    from gspread_formatting import batch_updater
+
+    sheet = some_gspread_worksheet
+
+    # Option 1: call execute() directly
+    batch = batch_updater(sheet.spreadsheet)
+    batch.format_cell_ranges(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+    batch.set_row_height(sheet, '1', 32)
+    batch.execute()
+
+    # Option 2: use with: block
+    with batch_updater(sheet.spreadsheet) as batch:
+        batch.format_cell_ranges(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+        batch.set_row_height(sheet, '1', 32)
+
+
 Installation
 ------------
 

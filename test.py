@@ -499,6 +499,20 @@ class WorksheetTest(GspreadTest):
         for col in col_md[0:1]:
             self.assertEqual(187, col['pixelSize'])
 
+    def test_batch_updater_context(self):
+        batch = batch_updater(self.sheet.spreadsheet)
+        batch.set_row_height(self.sheet, '1:5', 42)
+        batch.set_column_width(self.sheet, 'A', 187)
+        self.assertEqual(2, len(batch.requests))
+        try:
+            with batch:
+                batch.set_row_height(self.sheet, '1:5', 40)
+        except Exception as e:
+            self.assertIsInstance(e, IOError)
+        self.assertEqual(2, len(batch.requests))
+        batch.execute()
+        self.assertEqual(0, len(batch.requests))
+
 
 class ColorTest(unittest.TestCase):
 

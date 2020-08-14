@@ -16,7 +16,8 @@ class SpreadsheetBatchUpdater(object):
         self.requests = []
 
     def __enter__(self):
-        # TODO should self.requests be cleared? Should exc raise if self.requests != []?
+        if self.requests:
+            raise IOError("BatchUpdater has un-executed requests pending, cannot be __enter__ed")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

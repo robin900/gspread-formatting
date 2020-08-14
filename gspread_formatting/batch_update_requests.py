@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+This module provides functions that generate request objects compatible with the
+"batchUpdate" API call in Google Sheets. Both the ``.functions`` and
+``.batch`` modules make use of these request functions, wrapping them
+in functions that make the API call or calls using the generated request objects.
+"""
 
 from .util import _build_repeat_cell_request, _range_to_dimensionrange_object
+
+from functools import wraps
 
 __all__ = (
     'format_cell_ranges', 'format_cell_range', 'set_frozen',
@@ -8,6 +16,12 @@ __all__ = (
     'set_row_height', 'set_row_heights',
     'set_column_width', 'set_column_widths'
 )
+
+def _wrap_as_standalone_function(func):
+    @wraps(func)
+    def f(worksheet, *args, **kwargs):
+        return worksheet.spreadsheet.batch_update({'requests': func(worksheet, *args, **kwargs)})
+    return f
 
 
 def set_row_heights(worksheet, ranges):
