@@ -216,7 +216,7 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-* Python 2.7, 3+
+* Python 2.7, 3.x; PyPy and PyPy3
 * gspread >= 3.0.0
 
 From PyPI
