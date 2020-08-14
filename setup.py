@@ -28,7 +28,7 @@ setup(
     install_requires=[
         'gspread>=3.0.0' 
         ],
-    description='Apply cell formatting to gspread worksheets',
+    description='Complete Google Sheets formatting support for gspread worksheets',
     long_description=long_description,
     author='Robin Thomas',
     author_email='rthomas900@gmail.com',
