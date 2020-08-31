@@ -8,20 +8,8 @@ import sys
 
 PY3 = sys.version_info >= (3, 0)
 
-with open(os.path.join(os.path.dirname(__file__), 'VERSION'), 'rb') as f:
-    VERSION = f.read()
-    if PY3:
-        VERSION = VERSION.decode('utf8')
-    VERSION = VERSION.strip()
-
-with open(os.path.join(os.path.dirname(__file__), 'README.rst'), 'rb') as f:
-    long_description = f.read()
-    if PY3:
-        long_description = long_description.decode('utf8')
-
 setup(
     name='gspread-formatting',
-    version=VERSION,
     packages=['gspread_formatting'],
     package_data={'': ['*.rst']},
     test_suite='test',
@@ -29,7 +17,6 @@ setup(
         'gspread>=3.0.0' 
         ],
     description='Complete Google Sheets formatting support for gspread worksheets',
-    long_description=long_description,
     author='Robin Thomas',
     author_email='rthomas900@gmail.com',
     license='MIT',
