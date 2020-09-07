@@ -2,11 +2,36 @@ Changelog
 =========
 
 
+v0.3.1 (2020-09-07)
+-------------------
+- Bump to 0.3.1. [Robin Thomas]
+- Consolidated CONDITIONALS.rst into README.rst. [Robin Thomas]
+- Let setup.cfg handle long_description and append conditionals doc.
+  [Robin Thomas]
+- Better short desc. [Robin Thomas]
+- Added PyPy and CPython implementation classifications to setup.py.
+  [Robin Thomas]
+- Remove unused _wrap_as_standalone_function duplicate. [Robin Thomas]
+- Indicate PyPy and PyPy3 support in README. (PyPy3 Travis build
+  stumbles on Pandas install problems; my local PyPy3 environment (which
+  required special NumPy source install with OpenBLAS config) shows a
+  successful test suite. [Robin Thomas]
+- Remove pypy3 travis target until pandas install problems can be fixed.
+  [Robin Thomas]
+
+
 v0.3.0 (2020-08-14)
 -------------------
 - Bump to version 0.3.0. [Robin Thomas]
 - Include pypy and pypy3 in travis builds. [Robin Thomas]
 - Add "batch updater" object (#21) [Robin Thomas]
+
+  * Added batch capability to all formatting functions as well as format_with_dataframe.
+  Minimal test coverage.
+
+  * use "del listobj[:]" for 2.7 compatbility
+
+  * Additional batch-updater tests; added batch updater docs to README.
 
 
 v0.2.5 (2020-07-17)
