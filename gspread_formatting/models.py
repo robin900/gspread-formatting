@@ -3,12 +3,64 @@
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
                   
+class _field(object):
+    def __init__(self, type, values=None, required=False):
+        self.type = type
+        self.values = values
+        self.required = required
+
+    def validate(self, value):
+        if value == None:
+            if self.required:
+                raise ValueError("is a required value")
+            else:
+                return value
+        if not isinstance(value, self.type):
+            raise ValueError("must be an instance of %s" % self.type)
+        if self.values != None and value not in self.values:
+            raise ValueError("must be one of the following: %s" % self.values)
+        return value
+
+def _required(type, values=None):
+    return _field(type, values, required=True)
+
+def _optional(type, values=None):
+    return _field(type, values, required=False)
+
+def _enum(values, required=False):
+    return _field(type(next(iter(values))), values, required)
+
+
 class FormattingComponent(object):
-    _FIELDS = ()
+    _FIELDS = {}
 
     @classmethod
     def from_props(cls, props):
         return _props_to_component(_CLASSES, _underlower(cls.__name__), props)
+
+    def __init__(self, *args, **kwargs):
+        combined_kwargs = {}
+        # TODO positional args match either position in _FIELDS or by underlower name!
+        for arg in args:
+            # must be a FormattingComponent
+            if not isinstance(arg, FormattingComponent):
+                raise ValueError("Positional argument must be an instance of FormattingComponent, not %r" % arg)
+            # its camelCase name must match that of something in _FIELDS
+            arg_ul_name = _underlower(arg.__class__.__name__)
+            if arg_ul_name not in self._FIELDS:
+                raise ValueError("Positional argument (a %s) does not match any of the expected arguments: %s" % (arg_ul_name, self._FIELDS))
+            combined_kwargs[arg_ul_name] = arg
+        for k, v in kwargs:
+            if k not in self._FIELDS:
+                raise ValueError(
+                    "Keyword argument '%s' does not match any of "
+                    "the expected arguments: %s" % (k, self._FIELDS)
+                )
+            combined_kwargs[k] = v
+        for attrname in self._FIELDS:
+            # TODO check for requiredness
+            # TODO type/value check
+            setattr(self, attrname, combined_kwargs.get(attrname))
 
     def __repr__(self):
         return '<' + self.__class__.__name__ + ' ' + str(self) + '>'
@@ -101,97 +153,29 @@ class FormattingComponent(object):
     __sub__ = difference
 
 class GridRange(FormattingComponent):
-    _FIELDS = ('sheetId', 'startRowIndex', 'endRowIndex', 'startColumnIndex', 'endColumnIndex')
+    _FIELDS = {
+        'sheetId': _required(int), 
+        'startRowIndex': _optional(int), 
+        'endRowIndex': _optional(int), 
+        'startColumnIndex': _optional(int), 
+        'endColumnIndex': _optional(int)
+    }
 
     @classmethod
     def from_a1_range(cls, range, worksheet):
         return GridRange.from_props(_range_to_gridrange_object(range, worksheet.id))
 
-    def __init__(self, sheetId, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex):
-        self.sheetId = sheetId
-        self.startRowIndex = startRowIndex
-        self.endRowIndex = endRowIndex
-        self.startColumnIndex = startColumnIndex
-        self.endColumnIndex = endColumnIndex
-
 class CellFormatComponent(FormattingComponent):
     pass
 
-class CellFormat(CellFormatComponent):
-    _FIELDS = {
-        'numberFormat': None,
-        'backgroundColor': 'color',
-        'borders': None,
-        'padding': None,
-        'horizontalAlignment': None,
-        'verticalAlignment': None,
-        'wrapStrategy': None,
-        'textDirection': None,
-        'textFormat': None,
-        'hyperlinkDisplayType': None,
-        'textRotation': None,
-        'foregroundColorStyle': 'colorStyle',
-        'backgroundColorStyle': 'colorStyle'
-    }
-
-    def __init__(self,
-        numberFormat=None,
-        backgroundColor=None,
-        borders=None,
-        padding=None,
-        horizontalAlignment=None,
-        verticalAlignment=None,
-        wrapStrategy=None,
-        textDirection=None,
-        textFormat=None,
-        hyperlinkDisplayType=None,
-        textRotation=None,
-        foregroundColorStyle=None,
-        backgroundColorStyle=None
-        ):
-        self.numberFormat = numberFormat
-        self.backgroundColor = backgroundColor
-        self.borders = borders
-        self.padding = padding
-        self.horizontalAlignment = _parse_string_enum('horizontalAlignment', horizontalAlignment, set(['LEFT', 'CENTER', 'RIGHT']))
-        self.verticalAlignment = _parse_string_enum('verticalAlignment', verticalAlignment, set(['TOP', 'MIDDLE', 'BOTTOM']))
-        self.wrapStrategy = _parse_string_enum('wrapStrategy', wrapStrategy, set(['OVERFLOW_CELL', 'LEGACY_WRAP', 'CLIP', 'WRAP']))
-        self.textDirection = _parse_string_enum('textDirection', textDirection, set(['LEFT_TO_RIGHT', 'RIGHT_TO_LEFT']))
-        self.textFormat = textFormat
-        self.hyperlinkDisplayType = _parse_string_enum('hyperlinkDisplayType', hyperlinkDisplayType, set(['LINKED', 'PLAIN_TEXT']))
-        self.textRotation = textRotation
-        self.foregroundColorStyle = foregroundColorStyle
-        self.backgroundColorStyle = backgroundColorStyle
-
-class NumberFormat(CellFormatComponent):
-    _FIELDS = ('type', 'pattern')
-
-    TYPES = set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])
-
-    def __init__(self, type, pattern=None):
-        if type.upper() not in NumberFormat.TYPES:
-            raise ValueError("NumberFormat.type must be one of: %s" % NumberFormat.TYPES)
-        self.type = type.upper()
-        self.pattern = pattern
-
-class ColorStyle(CellFormatComponent):
-    _FIELDS = {
-        'themeColor': None,
-        'rgbColor': 'color'
-    }
-
-    def __init__(self, themeColor=None, rgbColor=None):
-        self.themeColor = themeColor
-        self.rgbColor = rgbColor
 
 class Color(CellFormatComponent):
-    _FIELDS = ('red', 'green', 'blue', 'alpha')
-
-    def __init__(self, red=None, green=None, blue=None, alpha=None):
-        self.red = red
-        self.green = green
-        self.blue = blue
-        self.alpha = alpha
+    _FIELDS = {
+        'red': _optional((int, float)), 
+        'green': _optional((int, float)), 
+        'blue': _optional((int, float)), 
+        'alpha': _optional((int, float))
+    }
 
     @classmethod
     def fromHex(cls,hexcolor):
@@ -231,83 +215,89 @@ class Color(CellFormatComponent):
             hexformat = '#{RR}{GG}{BB}'.format(RR=RR,GG=GG,BB=BB)
         return hexformat
 
+class NumberFormat(CellFormatComponent):
+    _FIELDS = {
+        'type': _enum(set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])),
+        'pattern': _optional(str)
+    }
+
+
+class ColorStyle(CellFormatComponent):
+    _FIELDS = {
+        'themeColor': _optional(str),
+        'rgbColor': _optional(Color)
+    }
+
+
 class Border(CellFormatComponent):
-    _FIELDS = ('style', 'color', 'colorStyle')
+    _FIELDS = {
+        'style': _enum(
+            set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE']), 
+            required=True
+            ),
+        'color': _optional(Color),
+        'width': _optional(int),
+        'colorStyle': _optional(ColorStyle)
+    }
 
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
-    def __init__(self, style, color=None, width=None, colorStyle=None):
-        if style.upper() not in Border.STYLES:
-            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
-        self.style = style.upper()
-        self.width = width
-        self.color = color
-        self.colorStyle = colorStyle
 
 class Borders(CellFormatComponent):
     _FIELDS = {
-        'top': 'border',
-        'bottom': 'border',
-        'left': 'border',
-        'right': 'border'
+        'top': _optional(Border),
+        'bottom': _optional(Border),
+        'left': _optional(Border),
+        'right': _optional(Border)
     }
 
-    def __init__(self, top=None, bottom=None, left=None, right=None):
-        self.top = top
-        self.bottom = bottom
-        self.left = left
-        self.right = right
 
 class Padding(CellFormatComponent):
-    _FIELDS = ('top', 'right', 'bottom', 'left')
+    _FIELDS = {
+        'top': _optional(int), 
+        'right': _optional(int), 
+        'bottom': _optional(int), 
+        'left': _optional(int)
+    }
 
-    def __init__(self, top=None, right=None, bottom=None, left=None):
-        self.top = top
-        self.right = right
-        self.bottom = bottom
-        self.left = left
 
 class TextFormat(CellFormatComponent):
     _FIELDS = {
-        'foregroundColor': 'color',
-        'fontFamily': None,
-        'fontSize': None,
-        'bold': None,
-        'italic': None,
-        'strikethrough': None,
-        'underline': None,
-        'foregroundColorStyle': 'colorStyle'
+        'foregroundColor': _optional(Color),
+        'fontFamily': _optional(str),
+        'fontSize': _optional(int),
+        'bold': _optional(bool),
+        'italic': _optional(bool),
+        'strikethrough': _optional(bool),
+        'underline': _optional(bool),
+        'foregroundColorStyle': _optional(ColorStyle)
     }
 
-    def __init__(self,
-        foregroundColor=None,
-        fontFamily=None,
-        fontSize=None,
-        bold=None,
-        italic=None,
-        strikethrough=None,
-        underline=None,
-        foregroundColorStyle=None
-        ):
-        self.foregroundColor = foregroundColor
-        self.fontFamily = fontFamily
-        self.fontSize = fontSize
-        self.bold = bold
-        self.italic = italic
-        self.strikethrough = strikethrough
-        self.underline = underline
-        self.foregroundColorStyle = foregroundColorStyle
 
 class TextRotation(CellFormatComponent):
-    _FIELDS = ('angle', 'vertical')
+    _FIELDS = {
+        'angle': _optional(int), 
+        'vertical': _optional(bool)
+    }
 
-    def __init__(self, angle=None, vertical=None):
-        if len([expr for expr in (angle is not None, vertical is not None) if expr]) != 1:
-            raise ValueError("Either angle or vertical must be specified, not both or neither")
-        self.angle = angle
-        self.vertical = vertical
 
-# provide camelCase aliases for all component classes.
+class CellFormat(CellFormatComponent):
+    _FIELDS = {
+        'numberFormat': _optional(NumberFormat),
+        'backgroundColor': _optional(Color),
+        'borders': _optional(Borders),
+        'padding': _optional(Padding),
+        'horizontalAlignment': _enum(set(['LEFT', 'CENTER', 'RIGHT'])),
+        'verticalAlignment': _enum(set(['TOP', 'MIDDLE', 'BOTTOM'])),
+        'wrapStrategy': _enum(set(['OVERFLOW_CELL', 'LEGACY_WRAP', 'CLIP', 'WRAP'])),
+        'textDirection': _enum(set(['LEFT_TO_RIGHT', 'RIGHT_TO_LEFT'])),
+        'textFormat': _optional(str),
+        'hyperlinkDisplayType': _enum(set(['LINKED', 'PLAIN_TEXT'])),
+        'textRotation': None,
+        'foregroundColorStyle': _optional(ColorStyle),
+        'backgroundColorStyle': _optional(ColorStyle)
+    }
+
 
 _CLASSES = {}
 for _c in [ obj for name, obj in locals().items() if isinstance(obj, type) and issubclass(obj, CellFormatComponent) ]:

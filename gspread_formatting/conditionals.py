@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .util import _parse_string_enum, _underlower, _enforce_type
-from .models import FormattingComponent, GridRange, _CLASSES
+from .models import FormattingComponent, GridRange, CellFormat, _CLASSES, _required, _optional, _enum
 
 try:
     from collections.abc import MutableSequence, Iterable
@@ -88,16 +88,6 @@ class ConditionalFormatRules(MutableSequence):
         
 class ConditionalFormattingComponent(FormattingComponent):
     pass
-
-class BooleanRule(ConditionalFormattingComponent):
-    _FIELDS = {
-        'condition': 'booleanCondition', 
-        'format': 'cellFormat'
-    }
-
-    def __init__(self, condition, format):
-        self.condition = condition
-        self.format = format
 
 class BooleanCondition(ConditionalFormattingComponent):
 
@@ -212,34 +202,42 @@ class InterpolationPoint(ConditionalFormattingComponent):
 
 class GradientRule(ConditionalFormattingComponent):
     _FIELDS = {
-        'minpoint': 'interpolationPoint', 
-        'midpoint': 'interpolationPoint', 
-        'maxpoint': 'interpolationPoint'
+        'minpoint': _required(InterpolationPoint),
+        'midpoint': _optional(InterpolationPoint),
+        'maxpoint': _required(InterpolationPoint)
     }
 
-    def __init__(self, minpoint, maxpoint, midpoint=None):
-        self.minpoint = _enforce_type("minpoint", InterpolationPoint, minpoint, required=True)
-        self.midpoint = _enforce_type("midpoint", InterpolationPoint, midpoint, required=False)
-        self.maxpoint = _enforce_type("maxpoint", InterpolationPoint, maxpoint, required=True)
+
+class BooleanRule(ConditionalFormattingComponent):
+    _FIELDS = {
+        'condition': _required(BooleanCondition),
+        'format': _required(CellFormat)
+    }
+
 
 class ConditionalFormatRule(ConditionalFormattingComponent):
-    _FIELDS = ('ranges', 'booleanRule', 'gradientRule')
+    _FIELDS = {
+        'ranges': _required((list, tuple)), 
+        'booleanRule': _optional(BooleanRule), 
+        'gradientRule': _optional(GradientRule)
+    }
 
-    def __init__(self, ranges, booleanRule=None, gradientRule=None):
-        self.booleanRule = _enforce_type("booleanRule", BooleanRule, booleanRule, required=False)
+    # TODO support field unions like booleanRule XOR gradientRule
+
+    def __init__(self, *args, **kwargs):
+        super(self, ConditionalFormatRule).__init__(*arg, **kwargs)
         if self.booleanRule:
             if self.booleanRule.condition.type in BooleanCondition.illegal_types_for_conditional_formatting:
                 raise ValueError(
                     "BooleanCondition.type for conditional formatting must not be one of: %s" % 
                     BooleanCondition.illegal_types_for_conditional_formatting
                 )
-        self.gradientRule = _enforce_type("gradientRule", GradientRule, gradientRule, required=False)
         if len([x for x in (self.booleanRule, self.gradientRule) if x is not None]) != 1:
             raise ValueError("Must specify exactly one of: booleanRule, gradientRule")
         # values are either GridRange objects or bare properties 
         self.ranges = [ 
             v if isinstance(v, GridRange) else GridRange.from_props(v)
-            for v in ranges 
+            for v in self.ranges 
         ]
 
     def to_props(self):
@@ -254,22 +252,19 @@ class ConditionalFormatRule(ConditionalFormattingComponent):
 
 class DataValidationRule(FormattingComponent):
     _FIELDS = {
-        'condition': 'booleanCondition', 
-        'inputMessage': str, 
-        'strict': bool, 
-        'showCustomUi': bool
+        'condition': _required(BooleanCondition),
+        'inputMessage': _optional(str), 
+        'strict': _optional(bool), 
+        'showCustomUi': _optional(bool)
     }
 
-    def __init__(self, condition, inputMessage=None, strict=None, showCustomUi=None):
-        self.condition = _enforce_type("condition", BooleanCondition, condition, True)
+    def __init__(self, *args, **kwargs):
+        super(self, DataValidationRule).__init__(*args, **kwargs)
         if self.condition.type in BooleanCondition.illegal_types_for_data_validation:
             raise ValueError(
                 "BooleanCondition.type for data validation must not be one of: %s" % 
                 BooleanCondition.illegal_types_for_data_validation
             )
-        self.inputMessage = _enforce_type("inputMessage", str, inputMessage, False)
-        self.strict = _enforce_type("strict", bool, strict, False)
-        self.showCustomUi = _enforce_type("showCustomUi", bool, showCustomUi, False)
 
 # provide camelCase aliases for all component classes.
 
