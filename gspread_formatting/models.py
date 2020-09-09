@@ -40,9 +40,17 @@ class FormattingComponent(object):
 
     def __init__(self, *args, **kwargs):
         combined_kwargs = {}
-        # TODO positional args match either position in _FIELDS or by underlower name!
-        for arg in args:
-            # must be a FormattingComponent
+        field_names = list(self._FIELDS.keys())
+        # TODO positional args match either by underlower name or by position in _FIELDS or by underlower name!
+        for idx, arg in enumerate(args):
+            # TODO below
+            # if type is correct (basic type or FormattingComponent type) for positional field in _FIELDS, 
+            # it's a match.
+            
+            # elif a FormattingComponent, and its _underlower name matches a previously unmatched 
+            # field in _FIELDS, it's a match.
+
+            # else this argument is invalid.
             if not isinstance(arg, FormattingComponent):
                 raise ValueError("Positional argument must be an instance of FormattingComponent, not %r" % arg)
             # its camelCase name must match that of something in _FIELDS
