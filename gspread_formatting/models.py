@@ -4,11 +4,15 @@ from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
                   
 class _field(object):
-    def __init__(self, type, values=None, required=False):
+    def __init__(self, type, values=None, required=False, deprecated=False):
         self.type = type
         self.values = values
         self.required = required
+        self.deprecated = deprecated
 
+    def type_matches(self, value):
+        return value == None or isinstance(value, self.type)
+        
     def validate(self, value):
         if value == None:
             if self.required:
@@ -27,6 +31,9 @@ def _required(type, values=None):
 def _optional(type, values=None):
     return _field(type, values, required=False)
 
+def _deprecated(type, values=None):
+    return _field(type, values, required=False, deprecated=True)
+
 def _enum(values, required=False):
     return _field(type(next(iter(values))), values, required)
 
@@ -43,32 +50,39 @@ class FormattingComponent(object):
         field_names = list(self._FIELDS.keys())
         # TODO positional args match either by underlower name or by position in _FIELDS or by underlower name!
         for idx, arg in enumerate(args):
-            # TODO below
+            pos_field_name = field_names[idx] if idx < len(field_names) else None
+            pos_field = self._FIELDS[pos_field_name]
             # if type is correct (basic type or FormattingComponent type) for positional field in _FIELDS, 
-            # it's a match.
+            if pos_field.type_matches(arg):
+                combined_kwargs[pos_field_name] = arg
+                continue
             
             # elif a FormattingComponent, and its _underlower name matches a previously unmatched 
             # field in _FIELDS, it's a match.
+            if isinstance(arg, FormattingComponent):
+                ul_name = _underlower(arg.__class__.__name__) 
+                if ul_name in self._FIELDS and ul_name not in combined_kwargs:
+                    combined_kwargs[ul_name] = arg
+                    continue
 
-            # else this argument is invalid.
-            if not isinstance(arg, FormattingComponent):
-                raise ValueError("Positional argument must be an instance of FormattingComponent, not %r" % arg)
-            # its camelCase name must match that of something in _FIELDS
-            arg_ul_name = _underlower(arg.__class__.__name__)
-            if arg_ul_name not in self._FIELDS:
-                raise ValueError("Positional argument (a %s) does not match any of the expected arguments: %s" % (arg_ul_name, self._FIELDS))
-            combined_kwargs[arg_ul_name] = arg
-        for k, v in kwargs:
+            # else invalid
+            raise ValueError("Positional argument must be an instance of %s, not %r" % (field.type, arg))
+        for k, v in kwargs.items():
             if k not in self._FIELDS:
                 raise ValueError(
                     "Keyword argument '%s' does not match any of "
                     "the expected arguments: %s" % (k, self._FIELDS)
                 )
             combined_kwargs[k] = v
-        for attrname in self._FIELDS:
-            # TODO check for requiredness
-            # TODO type/value check
-            setattr(self, attrname, combined_kwargs.get(attrname))
+        for attrname, attrfield in self._FIELDS.items():
+            kwarg = combined_kwargs.get(attrname)
+            try:
+                attrfield.validate(kwarg)
+            except ValueError as e:
+                raise ValueError("%s %s" % (attrname, e.args[0]))
+            # TODO how to warn, if at all, about deprecated fields?
+            if not attrfield.deprecated:
+                setattr(self, attrname, kwarg)
 
     def __repr__(self):
         return '<' + self.__class__.__name__ + ' ' + str(self) + '>'
@@ -76,7 +90,7 @@ class FormattingComponent(object):
     def __str__(self):
         p = []
         for a in self._FIELDS:
-            v = getattr(self, a)
+            v = getattr(self, a, None)
             if v is not None:
                 if isinstance(v, FormattingComponent):
                     p.append( (a, "(" + str(v) + ")") )
@@ -87,14 +101,14 @@ class FormattingComponent(object):
     def to_props(self):
         p = {}
         for a in self._FIELDS:
-            if getattr(self, a) is not None:
+            if getattr(self, a, None) is not None:
                 p[a] = _extract_props(getattr(self, a))
         return p
 
     def affected_fields(self, prefix):
         fields = []
         for a in self._FIELDS:
-            if getattr(self, a) is not None:
+            if getattr(self, a, None) is not None:
                 fields.extend( _extract_fieldrefs(a, getattr(self, a), prefix) )
         return fields
 
@@ -243,12 +257,10 @@ class Border(CellFormatComponent):
             set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE']), 
             required=True
             ),
+        'width': _deprecated(int),
         'color': _optional(Color),
-        'width': _optional(int),
         'colorStyle': _optional(ColorStyle)
     }
-
-    STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
 
 class Borders(CellFormatComponent):
@@ -299,9 +311,9 @@ class CellFormat(CellFormatComponent):
         'verticalAlignment': _enum(set(['TOP', 'MIDDLE', 'BOTTOM'])),
         'wrapStrategy': _enum(set(['OVERFLOW_CELL', 'LEGACY_WRAP', 'CLIP', 'WRAP'])),
         'textDirection': _enum(set(['LEFT_TO_RIGHT', 'RIGHT_TO_LEFT'])),
-        'textFormat': _optional(str),
+        'textFormat': _optional(TextFormat),
         'hyperlinkDisplayType': _enum(set(['LINKED', 'PLAIN_TEXT'])),
-        'textRotation': None,
+        'textRotation': _optional(TextRotation),
         'foregroundColorStyle': _optional(ColorStyle),
         'backgroundColorStyle': _optional(ColorStyle)
     }

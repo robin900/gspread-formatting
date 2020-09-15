@@ -191,7 +191,7 @@ class WorksheetTest(GspreadTest):
         f = border('DOTTED', color(0.2, 0.2, 0.2))
 
     def test_bottom_attribute(self):
-        f = padding(bottom=1.1)
+        f = padding(bottom=1)
         f = borders(bottom=border('SOLID'))
 
     def test_format_range(self):

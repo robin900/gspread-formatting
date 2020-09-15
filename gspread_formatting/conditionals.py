@@ -225,7 +225,7 @@ class ConditionalFormatRule(ConditionalFormattingComponent):
     # TODO support field unions like booleanRule XOR gradientRule
 
     def __init__(self, *args, **kwargs):
-        super(self, ConditionalFormatRule).__init__(*arg, **kwargs)
+        super(ConditionalFormatRule, self).__init__(*args, **kwargs)
         if self.booleanRule:
             if self.booleanRule.condition.type in BooleanCondition.illegal_types_for_conditional_formatting:
                 raise ValueError(
@@ -259,7 +259,7 @@ class DataValidationRule(FormattingComponent):
     }
 
     def __init__(self, *args, **kwargs):
-        super(self, DataValidationRule).__init__(*args, **kwargs)
+        super(DataValidationRule, self).__init__(*args, **kwargs)
         if self.condition.type in BooleanCondition.illegal_types_for_data_validation:
             raise ValueError(
                 "BooleanCondition.type for data validation must not be one of: %s" % 

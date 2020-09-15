@@ -91,8 +91,8 @@ def _props_to_component(class_registry, class_alias, value, none_if_empty=False)
     kwargs = {}
     for k, v in value.items():
         if isinstance(v, dict):
-            if isinstance(cls._FIELDS, dict) and cls._FIELDS.get(k) is not None:
-                item_alias = cls._FIELDS[k]
+            if cls._FIELDS.get(k) is not None:
+                item_alias = _underlower(cls._FIELDS[k].type.__name__)
             else:
                 item_alias = k
             v = _props_to_component(class_registry, item_alias, v, True)
