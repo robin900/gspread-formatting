@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+v0.3.2 (2020-09-16)
+-------------------
+- Bump to v0.3.2. [Robin Thomas]
+- Fixes #23. Test coverage added. [Robin Thomas]
+- Support InterpolationPoint.colorStyle. [Robin Thomas]
+
+
 v0.3.1 (2020-09-07)
 -------------------
 - Bump to 0.3.1. [Robin Thomas]
