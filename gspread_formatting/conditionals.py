@@ -199,12 +199,13 @@ class ConditionValue(ConditionalFormattingComponent):
         self.userEnteredValue = userEnteredValue
 
 class InterpolationPoint(ConditionalFormattingComponent):
-    _FIELDS = ('color', 'type', 'value')
+    _FIELDS = ('color', 'colorStyle', 'type', 'value')
 
     TYPES = set(['MIN', 'MAX', 'NUMBER', 'PERCENT', 'PERCENTILE'])
 
-    def __init__(self, color, type, value=None):
+    def __init__(self, color, colorStyle, type, value=None):
         self.color = color
+        self.colorStyle = colorStyle
         self.type = _parse_string_enum("type", type, InterpolationPoint.TYPES, required=True)
         if value is None and self.type not in set(['MIN', 'MAX']):
             raise ValueError("InterpolationPoint.type %s requires a value" % self.type)
