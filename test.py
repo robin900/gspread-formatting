@@ -363,9 +363,9 @@ class WorksheetTest(GspreadTest):
         )
         new_rule_2 = ConditionalFormatRule(
             ranges=[GridRange.from_a1_range('A2:D2', self.sheet)],
-            booleanRule=BooleanRule(
-                condition=BooleanCondition('NUMBER_GREATER_THAN_EQ', '1'), 
-                format=CellFormat(textFormat=TextFormat(italic=True))
+            gradientRule=GradientRule(
+                maxpoint=InterpolationPoint(colorStyle=ColorStyle(themeColor='BACKGROUND'), type='MAX'),
+                minpoint=InterpolationPoint(colorStyle=ColorStyle(themeColor='TEXT'), type='NUMBER', value='1')
             )
         )
         current_rules.append(new_rule)
@@ -384,10 +384,8 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(list(current_rules), [new_rule_2, new_rule])
 
         bold_fmt = get_effective_format(self.sheet, 'A1')
-        italic_fmt = get_effective_format(self.sheet, 'C2')
         normal_fmt = get_effective_format(self.sheet, 'C1')
         self.assertEqual(bold_fmt.textFormat.bold, True)
-        self.assertEqual(italic_fmt.textFormat.italic, True)
         self.assertEqual(bool(normal_fmt.textFormat.bold), False)
         self.assertEqual(bool(normal_fmt.textFormat.italic), False)
 

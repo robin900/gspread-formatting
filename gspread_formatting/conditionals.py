@@ -203,7 +203,7 @@ class InterpolationPoint(ConditionalFormattingComponent):
 
     TYPES = set(['MIN', 'MAX', 'NUMBER', 'PERCENT', 'PERCENTILE'])
 
-    def __init__(self, color, colorStyle, type, value=None):
+    def __init__(self, color=None, colorStyle=None, type=None, value=None):
         self.color = color
         self.colorStyle = colorStyle
         self.type = _parse_string_enum("type", type, InterpolationPoint.TYPES, required=True)
