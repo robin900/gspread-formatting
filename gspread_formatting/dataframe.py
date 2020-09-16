@@ -189,7 +189,7 @@ class DataFrameFormatter(object):
         elif isinstance(value, numberFormat):
             return value
         elif isinstance(value, str):
-            return numberFormat(type, value) 
+            return numberFormat(type=type, pattern=value) 
         else:
             raise ValueError(value)
 

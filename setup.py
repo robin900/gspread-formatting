@@ -14,7 +14,8 @@ setup(
     package_data={'': ['*.rst']},
     test_suite='test',
     install_requires=[
-        'gspread>=3.0.0' 
+        'gspread>=3.0.0',
+        'six'
         ],
     description='Complete Google Sheets formatting support for gspread worksheets',
     author='Robin Thomas',

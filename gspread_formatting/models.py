@@ -2,6 +2,10 @@
 
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
+
+from six import ensure_text, string_types
+
+from collections import OrderedDict
                   
 class _field(object):
     def __init__(self, type, values=None, required=False, deprecated=False):
@@ -20,7 +24,7 @@ class _field(object):
             else:
                 return value
         if not isinstance(value, self.type):
-            raise ValueError("must be an instance of %s" % self.type)
+            raise ValueError("must be an instance of %s, not %s" % (self.type, type(value)))
         if self.values != None and value not in self.values:
             raise ValueError("must be one of the following: %s" % self.values)
         return value
@@ -35,11 +39,11 @@ def _deprecated(type, values=None):
     return _field(type, values, required=False, deprecated=True)
 
 def _enum(values, required=False):
-    return _field(type(next(iter(values))), values, required)
+    return _field(string_types, values, required)
 
 
 class FormattingComponent(object):
-    _FIELDS = {}
+    _FIELDS = OrderedDict()
 
     @classmethod
     def from_props(cls, props):
@@ -66,7 +70,7 @@ class FormattingComponent(object):
                     continue
 
             # else invalid
-            raise ValueError("Positional argument must be an instance of %s, not %r" % (field.type, arg))
+            raise ValueError("Positional argument must be an instance of %s, not %r" % (pos_field.type, arg))
         for k, v in kwargs.items():
             if k not in self._FIELDS:
                 raise ValueError(
@@ -175,7 +179,7 @@ class FormattingComponent(object):
     __sub__ = difference
 
 class GridRange(FormattingComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'sheetId': _required(int), 
         'startRowIndex': _optional(int), 
         'endRowIndex': _optional(int), 
@@ -192,7 +196,7 @@ class CellFormatComponent(FormattingComponent):
 
 
 class Color(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'red': _optional((int, float)), 
         'green': _optional((int, float)), 
         'blue': _optional((int, float)), 
@@ -238,21 +242,21 @@ class Color(CellFormatComponent):
         return hexformat
 
 class NumberFormat(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'type': _enum(set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])),
-        'pattern': _optional(str)
+        'pattern': _optional(string_types)
     }
 
 
 class ColorStyle(CellFormatComponent):
-    _FIELDS = {
-        'themeColor': _optional(str),
+    _FIELDS = OrderedDict(
+        'themeColor': _optional(string_types),
         'rgbColor': _optional(Color)
     }
 
 
 class Border(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'style': _enum(
             set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE']), 
             required=True
@@ -264,7 +268,7 @@ class Border(CellFormatComponent):
 
 
 class Borders(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'top': _optional(Border),
         'bottom': _optional(Border),
         'left': _optional(Border),
@@ -273,7 +277,7 @@ class Borders(CellFormatComponent):
 
 
 class Padding(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'top': _optional(int), 
         'right': _optional(int), 
         'bottom': _optional(int), 
@@ -282,9 +286,9 @@ class Padding(CellFormatComponent):
 
 
 class TextFormat(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'foregroundColor': _optional(Color),
-        'fontFamily': _optional(str),
+        'fontFamily': _optional(string_types),
         'fontSize': _optional(int),
         'bold': _optional(bool),
         'italic': _optional(bool),
@@ -295,14 +299,14 @@ class TextFormat(CellFormatComponent):
 
 
 class TextRotation(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'angle': _optional(int), 
         'vertical': _optional(bool)
     }
 
 
 class CellFormat(CellFormatComponent):
-    _FIELDS = {
+    _FIELDS = OrderedDict(
         'numberFormat': _optional(NumberFormat),
         'backgroundColor': _optional(Color),
         'borders': _optional(Borders),
