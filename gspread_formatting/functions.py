@@ -3,6 +3,9 @@
 from .util import _build_repeat_cell_request, _fetch_with_updated_properties, _range_to_dimensionrange_object
 from .models import CellFormat
 from .conditionals import DataValidationRule
+# These imports allow IDEs like PyCharm to verify the existence of these functions, 
+# even though we will rebind the names below with wrapped versions of the functions
+from gspread_formatting.batch_update_requests import * 
 import gspread_formatting.batch_update_requests
 
 from gspread.utils import a1_to_rowcol, rowcol_to_a1, finditem
@@ -25,7 +28,7 @@ def _wrap_as_standalone_function(func):
     return f
 
 for _fname in gspread_formatting.batch_update_requests.__all__:
-    locals()[_fname] = _wrap_as_standalone_function(getattr(gspread_formatting.batch_update_requests, _fname))
+    locals()[_fname] = _wrap_as_standalone_function(locals()[_fname])
 
 
 def get_data_validation_rule(worksheet, label):
