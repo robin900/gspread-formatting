@@ -2,6 +2,19 @@ Changelog
 =========
 
 
+v0.3.3 (2020-09-24)
+-------------------
+- Bump to version v0.3.3. [Robin Thomas]
+- Fixes #24. [Robin Thomas]
+
+  A certain set of functions that exist both in batch and standalone mode
+  are dynamically bound as local names in the functions subpackage. That makes
+  them undiscoverable by IDEs like PyCharm. Adding a straightforward import
+  statement for these function names -- even though the names are re-bound
+  immediately with wrapped standalone versions of the functions -- makes
+  the function names visible to PyCharm.
+
+
 v0.3.2 (2020-09-16)
 -------------------
 - Bump to v0.3.2. [Robin Thomas]
