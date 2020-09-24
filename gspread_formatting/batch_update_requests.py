@@ -47,6 +47,7 @@ def set_row_height(worksheet, label, height):
     :param worksheet: The ``Worksheet`` object.
     :param label: string representing a single row or range of rows, e.g. ``1`` or ``3:400``.
     :param height: An integer greater than or equal to 0.
+
     """
     return set_row_heights(worksheet, [(label, height)])
  
@@ -57,8 +58,9 @@ def set_column_widths(worksheet, ranges):
 
     :param worksheet: The ``Worksheet`` object.
     :param ranges: An iterable whose elements are pairs of:
-        a string with column range value in A1 notation, e.g. 'A:C',
-        and a integer specifying width in pixels.
+                   a string with column range value in A1 notation, e.g. 'A:C',
+                   and a integer specifying width in pixels.
+
     """
 
     return [
@@ -80,6 +82,7 @@ def set_column_width(worksheet, label, width):
     :param worksheet: The ``Worksheet`` object.
     :param label: string representing a single column or range of columns, e.g. ``A`` or ``B:D``.
     :param height: An integer greater than or equal to 0.
+
     """
 
     return set_column_widths(worksheet, [(label, width)])
@@ -93,6 +96,7 @@ def format_cell_ranges(worksheet, ranges):
     :param ranges: An iterable whose elements are pairs of:
         a string with range value in A1 notation, e.g. 'A1:A5',
         and a ``CellFormat`` object).
+
     """
 
     return [
@@ -108,6 +112,7 @@ def format_cell_range(worksheet, name, cell_format):
     :param worksheet: The ``Worksheet`` object.
     :param name: A string with range value in A1 notation, e.g. 'A1:A5'.
     :param cell_format: A ``CellFormat`` object.
+
     """
 
     return format_cell_ranges(worksheet, [(name, cell_format)])
@@ -116,10 +121,12 @@ def format_cell_range(worksheet, name, cell_format):
 def set_data_validation_for_cell_ranges(worksheet, ranges):
     """Update a list of Cell object ranges of :class:`Cell` objects
     in the given ``Worksheet`` to have the accompanying ``DataValidationRule``.
+
     :param worksheet: The ``Worksheet`` object.
     :param ranges: An iterable whose elements are pairs of:
-        a string with range value in A1 notation, e.g. 'A1:A5',
-        and a ``DataValidationRule`` object).
+                   a string with range value in A1 notation, e.g. 'A1:A5',
+                   and a ``DataValidationRule`` object).
+
     """
 
     return [
@@ -131,9 +138,11 @@ def set_data_validation_for_cell_ranges(worksheet, ranges):
 def set_data_validation_for_cell_range(worksheet, range, rule):
     """Update a list of Cell object ranges in the given ``Worksheet``
     to have the accompanying ``DataValidationRule``.
+
     :param worksheet: The ``Worksheet`` object.
     :param range: A string with range value in A1 notation, e.g. 'A1:A5'.
     :param rule: A DataValidationRule object.
+
     """
 
     return set_data_validation_for_cell_ranges(worksheet, [(range, rule)])

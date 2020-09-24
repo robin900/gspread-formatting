@@ -34,10 +34,12 @@ for _fname in gspread_formatting.batch_update_requests.__all__:
 def get_data_validation_rule(worksheet, label):
     """Returns a DataValidationRule object or None representing the
     data validation in effect for the cell identified by ``label``.
+
     :param worksheet: Worksheet object containing the cell whose data
                       validation rule is desired.
     :param label: String with cell label in common format, e.g. 'B1'.
                   Letter case is ignored.
+
     Example:
     >>> get_data_validation_rule(worksheet, 'A1')
     <DataValidationRule condition=(bold=True)>
@@ -69,6 +71,7 @@ def get_effective_format(worksheet, label):
     :param worksheet: Worksheet object containing the cell whose format is desired.
     :param label: String with cell label in common format, e.g. 'B1'.
                   Letter case is ignored.
+
     Example:
 
     >>> get_effective_format(worksheet, 'A1')
@@ -94,6 +97,7 @@ def get_user_entered_format(worksheet, label):
     :param worksheet: Worksheet object containing the cell whose format is desired.
     :param label: String with cell label in common format, e.g. 'B1'.
                   Letter case is ignored.
+
     Example:
 
     >>> get_user_entered_format(worksheet, 'A1')
