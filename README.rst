@@ -156,7 +156,6 @@ for more information. Here's a short example::
     eff_rule
     >>> None
 
-Conditional format rules are supported by this package! See the `Conditional Format Rules docs <./CONDITIONALS.rst>`_.
 
 Formatting a Worksheet Using a Pandas DataFrame
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
