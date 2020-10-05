@@ -497,6 +497,14 @@ class WorksheetTest(GspreadTest):
         for col in col_md[0:1]:
             self.assertEqual(187, col['pixelSize'])
 
+    def test_batch_updater_different_spreadsheet(self):
+        batch = batch_updater(self.sheet.spreadsheet)
+        other_spread = gspread.Spreadsheet(None, {'id': 'blech', 'title': 'Other sheet'})
+        other_sheet = gspread.Worksheet(other_spread, {'sheetId': 4, 'title': 'Bleh'})
+        batch.set_row_height(self.sheet, '1:5', 42)
+        with self.assertRaises(ValueError):
+            batch.set_row_height(other_sheet, '1:5', 42)
+
     def test_batch_updater_context(self):
         batch = batch_updater(self.sheet.spreadsheet)
         batch.set_row_height(self.sheet, '1:5', 42)
@@ -535,3 +543,36 @@ class ColorTest(unittest.TestCase):
                 Color.fromHex(hexstring)
 
 
+class FormattingComponentTest(unittest.TestCase):
+
+    def test_repr_and_equality(self):
+        comp = TextFormat(bold=True, italic=True)
+        comp2 = TextFormat(bold=True)
+        self.assertEqual('<TextFormat bold=True;italic=True>', repr(comp))
+        self.assertNotEqual(comp, comp2)
+        self.assertNotEqual(comp, None)
+        self.assertEqual(comp, comp)
+
+    def test_number_format_types(self):
+        for type_ in NumberFormat.TYPES:
+            f = NumberFormat(type_)
+            self.assertEqual(f, f)
+            self.assertEqual(type_, f.type)
+        with self.assertRaises(ValueError):
+            NumberFormat('BAD_TYPE')
+
+    def test_border_styles(self):
+        for style in Border.STYLES:
+            f = Border(style)
+            self.assertEqual(f, f)
+            self.assertEqual(style, f.style)
+        with self.assertRaises(ValueError):
+            Border('BAD_STYLE')
+
+    def test_text_rotation_exclusion(self):
+        TextRotation(angle=1)
+        TextRotation(vertical=True)
+        with self.assertRaises(ValueError):
+            TextRotation(angle=1, vertical=True)
+        with self.assertRaises(ValueError):
+            TextRotation()
