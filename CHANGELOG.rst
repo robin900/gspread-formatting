@@ -2,6 +2,17 @@ Changelog
 =========
 
 
+v0.3.4 (2020-10-22)
+-------------------
+- Bump to v0.3.4. [Robin Thomas]
+- More informative exception message when BooleanCondition receives non-
+  list/tuple for values parameter. [Robin Thomas]
+- Increased already-high test coverage. [Robin Thomas]
+- Removed dead link to now-inlined conditional formatting doc. [Robin
+  Thomas]
+- Correct doc/sphinx annoyances. [Robin Thomas]
+
+
 v0.3.3 (2020-09-24)
 -------------------
 - Bump to version v0.3.3. [Robin Thomas]
