@@ -158,6 +158,8 @@ class BooleanCondition(ConditionalFormattingComponent):
     def __init__(self, type, values=()):
         self.type = _parse_string_enum("type", type, BooleanCondition.TYPES)
         validator = BooleanCondition.TYPES[self.type]
+        if not isinstance(values, (list, tuple)):
+            raise ValueError("values parameter must always be list/tuple of values, even for a single element")
         valid = validator(values) if callable(validator) else len(values) == validator
         if not valid:
             raise ValueError(

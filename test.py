@@ -162,6 +162,18 @@ class WorksheetTest(GspreadTest):
         super(WorksheetTest, cls).setUpClass()
         ss_id = cls.config.get('Spreadsheet', 'id')
         cls.spreadsheet = cls.gc.open_by_key(ss_id)
+        cls.spreadsheet.batch_update(
+            {
+                "requests": [
+                    {
+                        "updateSpreadsheetProperties": {
+                            "properties": {"locale": "en_US"},
+                            "fields": "locale",
+                        }
+                    }
+                ]
+            }
+        )
         try:
             test_sheet = cls.spreadsheet.worksheet('wksht_test')
             if test_sheet:
@@ -342,6 +354,12 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_rule.strict, None)
         self.assertEqual(eff_rule, boolean_validation_rule)
 
+    def test_boolean_condition(self):
+        with self.assertRaises(ValueError):
+            BooleanCondition('TEXT_EQ', 'foo')
+        with self.assertRaises(ValueError):
+            BooleanCondition('ONE_OF_LIST', 'foo')
+
     def test_conditional_format_rules(self):
         rows = [
             ["A", "B", "C", "D"],
@@ -357,7 +375,7 @@ class WorksheetTest(GspreadTest):
         new_rule = ConditionalFormatRule(
             ranges=[GridRange.from_a1_range('A1:D1', self.sheet)],
             booleanRule=BooleanRule(
-                condition=BooleanCondition('TEXT_CONTAINS', 'A'), 
+                condition=BooleanCondition('TEXT_CONTAINS', ['A']), 
                 format=CellFormat(textFormat=TextFormat(bold=True))
             )
         )
