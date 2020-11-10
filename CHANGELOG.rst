@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+v0.3.5 (2020-11-10)
+-------------------
+- Bump to v0.3.5. [Robin Thomas]
+- Fixes #26. Allows `None` as rule parameter to
+  set_data_validation_rule* functions, which will clear data validation
+  rule for the relevant cells. [Robin Thomas]
+
+
 v0.3.4 (2020-10-22)
 -------------------
 - Bump to v0.3.4. [Robin Thomas]
