@@ -125,7 +125,8 @@ def set_data_validation_for_cell_ranges(worksheet, ranges):
     :param worksheet: The ``Worksheet`` object.
     :param ranges: An iterable whose elements are pairs of:
                    a string with range value in A1 notation, e.g. 'A1:A5',
-                   and a ``DataValidationRule`` object).
+                   and a ``DataValidationRule`` object or None to clear the data
+                   validation rule).
 
     """
 
@@ -136,12 +137,12 @@ def set_data_validation_for_cell_ranges(worksheet, ranges):
 
 
 def set_data_validation_for_cell_range(worksheet, range, rule):
-    """Update a list of Cell object ranges in the given ``Worksheet``
-    to have the accompanying ``DataValidationRule``.
+    """Update a Cell range in the given ``Worksheet``
+    to have the accompanying ``DataValidationRule`` (or no rule).
 
     :param worksheet: The ``Worksheet`` object.
     :param range: A string with range value in A1 notation, e.g. 'A1:A5'.
-    :param rule: A DataValidationRule object.
+    :param rule: A DataValidationRule object, or None to remove data validation rule for cells..
 
     """
 

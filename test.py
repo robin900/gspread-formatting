@@ -354,6 +354,10 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_rule.strict, None)
         self.assertEqual(eff_rule, boolean_validation_rule)
 
+        set_data_validation_for_cell_range(self.sheet, 'A4:D4', None)
+        eff_rule = get_data_validation_rule(self.sheet, 'A4')
+        self.assertEqual(eff_rule, None)
+
     def test_boolean_condition(self):
         with self.assertRaises(ValueError):
             BooleanCondition('TEXT_EQ', 'foo')

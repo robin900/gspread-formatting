@@ -5,8 +5,8 @@ def _build_repeat_cell_request(worksheet, range, cell_format, celldata_field='us
     return {
         'repeatCell': {
             'range': _range_to_gridrange_object(range, worksheet.id),
-            'cell': { celldata_field: cell_format.to_props() },
-            'fields': ",".join(cell_format.affected_fields(celldata_field))
+            'cell': { celldata_field: cell_format.to_props() if cell_format != None else None },
+            'fields': ",".join(cell_format.affected_fields(celldata_field)) if cell_format != None else celldata_field
         }
     }
 
