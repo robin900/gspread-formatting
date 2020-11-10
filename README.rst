@@ -155,6 +155,11 @@ for more information. Here's a short example::
     eff_rule = get_data_validation_rule(worksheet, 'A1')
     eff_rule
     >>> None
+    # Clear data validation rule by using None
+    set_data_validation_for_cell_range(worksheet, 'A2', None)
+    eff_rule = get_data_validation_rule(worksheet, 'A2')
+    eff_rule
+    >>> None
 
 
 Formatting a Worksheet Using a Pandas DataFrame
