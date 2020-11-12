@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+v0.3.6 (2020-11-12)
+-------------------
+- Bump to v0.3.6. [Robin Thomas]
+- Allow for absent sheetId property in GridRange objects coming from API
+  (suspected abrupt change in Sheets API behavior!) [Robin Thomas]
+- Added extra example for clearing data validation rule with None.
+  [Robin Thomas]
+
+
 v0.3.5 (2020-11-10)
 -------------------
 - Bump to v0.3.5. [Robin Thomas]
