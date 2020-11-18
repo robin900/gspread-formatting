@@ -201,13 +201,13 @@ as a context manager in a ``with:`` block, which will automate the call to ``.ex
 
     # Option 1: call execute() directly
     batch = batch_updater(sheet.spreadsheet)
-    batch.format_cell_ranges(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+    batch.format_cell_range(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
     batch.set_row_height(sheet, '1', 32)
     batch.execute()
 
     # Option 2: use with: block
     with batch_updater(sheet.spreadsheet) as batch:
-        batch.format_cell_ranges(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+        batch.format_cell_range(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
         batch.set_row_height(sheet, '1', 32)
 
 
