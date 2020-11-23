@@ -236,7 +236,7 @@ is numeric and greater than 100::
         ranges=[GridRange.from_a1_range('A1:A2000', worksheet)],
         booleanRule=BooleanRule(
             condition=BooleanCondition('NUMBER_GREATER', ['100']), 
-            format=CellFormat(textFormat=textFormat(bold=True), color=Color(1,0,0))
+            format=CellFormat(textFormat=textFormat(bold=True), backgroundColor=Color(1,0,0))
         )
     )
 
