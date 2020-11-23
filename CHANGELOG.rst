@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+v0.3.7 (2020-11-23)
+-------------------
+- Bump to v0.3.7. [Robin Thomas]
+- Corrected error in conditional format rules example code in README.
+  [Robin Thomas]
+- Fixed typo in README. [Robin Thomas]
+- Fixed typos in batch call documentation. [Robin Thomas]
+
+
 v0.3.6 (2020-11-12)
 -------------------
 - Bump to v0.3.6. [Robin Thomas]
