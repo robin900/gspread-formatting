@@ -1,8 +1,5 @@
 language: python
 cache: pip
-cache:
-  directories:
-  - $HOME/.cache/pip
 python:
 - '2.7'
 - '3.7'
@@ -18,6 +15,5 @@ install:
 - pip uninstall -y six
 - pip install six>=1.12.0
 - pip install -r requirements-test.txt
-- if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then pip install --only-binary -e .; else
-  pip install --prefer-binary -e .; fi
+- pip install --prefer-binary -e .
 script: python setup.py test
