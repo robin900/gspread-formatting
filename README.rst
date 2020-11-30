@@ -4,8 +4,8 @@ gspread-formatting
 .. image:: https://badge.fury.io/py/gspread-formatting.svg
     :target: https://badge.fury.io/py/gspread-formatting
 
-.. image:: https://travis-ci.org/robin900/gspread-formatting.svg?branch=master
-    :target: https://travis-ci.org/robin900/gspread-formatting
+.. image:: https://travis-ci.com/robin900/gspread-formatting.svg?branch=master
+    :target: https://travis-ci.com/robin900/gspread-formatting
 
 .. image:: https://img.shields.io/pypi/dm/gspread-formatting.svg
     :target: https://pypi.org/project/gspread-formatting
