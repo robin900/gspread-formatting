@@ -11,6 +11,8 @@ before_install:
 - tar xvzf .travis.secrets.tar.gz
 install:
 - pip install -U pip
+- pip uninstall -y six
+- pip install six>=1.12.0
 - pip install -r requirements-test.txt
 - if [[ $TRAVIS_PYTHON_VERSION == 2.6* ]]; then pip install --only-binary -e .; else
   pip install --prefer-binary -e .; fi
