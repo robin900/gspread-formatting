@@ -2,6 +2,8 @@
 
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
+
+import re
                   
 class FormattingComponent(object):
     _FIELDS = ()
@@ -185,6 +187,7 @@ class ColorStyle(CellFormatComponent):
         self.rgbColor = rgbColor
 
 class Color(CellFormatComponent):
+    _HEX_PATTERN = re.compile(r'^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$', re.IGNORECASE)
     _FIELDS = ('red', 'green', 'blue', 'alpha')
 
     def __init__(self, red=None, green=None, blue=None, alpha=None):
@@ -195,41 +198,18 @@ class Color(CellFormatComponent):
 
     @classmethod
     def fromHex(cls,hexcolor):
-        # Check Hex String
-        if not hexcolor.startswith('#'):
-            raise ValueError('Color string given: %s: Hex color strings must start with #' % hexcolor)
-        hexlen = len(hexcolor)
-        if hexlen != 7 and hexlen != 9:
-            raise ValueError('Color string given: %s: Hex string must be of the form: "#RRGGBB" or "#RRGGBBAA' % hexcolor)
-        # Remainder of string should be parsable as hex
-        try:
-            if int(hexcolor[1:],16):
-                pass
-        except Exception as e:
-            raise ValueError('Color string given: %s: Bad color string entered' % hexcolor)
-        # Convert Hex range 0-255 to 0-1.0
-        RR = int(hexcolor[1:3],16) / 255.0
-        GG = int(hexcolor[3:5],16) / 255.0
-        BB = int(hexcolor[5:7],16) / 255.0
-        # Slices wont causes IndexErrors
-        A = hexcolor[7:9]
-        if not A:
-            AA = None
-        else:
-            AA = int(A,16) / 255.0
-        return cls(red=RR,green=GG,blue=BB,alpha=AA)
+        match = cls._HEX_PATTERN.search(hexcolor)
+        if not match:
+            raise ValueError('Color string given: %s: Hex string must be of the form: "#RRGGBB" or "#RRGGBBAA"' % hexcolor)
+        # Convert Hex range 0-255 to 0-1.0 for red, green, blue, alpha
+        return cls(*[int(a, 16)/255.0 if a else None for a in match.groups()])
 
     def toHex(self):
         RR = format(int((self.red if self.red else 0) * 255), '02x')
         GG = format(int((self.green if self.green else 0) * 255), '02x')
         BB = format(int((self.blue if self.blue else 0) * 255), '02x')
         AA = format(int((self.alpha if self.alpha else 0) * 255), '02x')
-
-        if self.alpha != None:
-            hexformat = '#{RR}{GG}{BB}{AA}'.format(RR=RR,GG=GG,BB=BB,AA=AA)
-        else:
-            hexformat = '#{RR}{GG}{BB}'.format(RR=RR,GG=GG,BB=BB)
-        return hexformat
+        return '#{0}{1}{2}{3}'.format(RR, GG, BB, (AA if self.alpha != None else ''))
 
 class Border(CellFormatComponent):
     _FIELDS = ('style', 'color', 'colorStyle')
