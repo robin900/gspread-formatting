@@ -598,3 +598,10 @@ class FormattingComponentTest(unittest.TestCase):
             TextRotation(angle=1, vertical=True)
         with self.assertRaises(ValueError):
             TextRotation()
+
+class GridRangeTest(unittest.TestCase):
+
+    def test_absent_sheet_id(self):
+        gr = GridRange.from_props({'startRowIndex': 1})
+        self.assertEqual(0, gr.sheetId)
+        self.assertEqual(1, gr.startRowIndex)
