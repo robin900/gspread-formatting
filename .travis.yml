@@ -10,13 +10,5 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_92656c47caa2_key -iv $encrypted_92656c47caa2_iv
   -in .travis.secrets.tar.gz.enc -out .travis.secrets.tar.gz -d
 - tar xvzf .travis.secrets.tar.gz
-install:
-- pip install -U pip
-- pip uninstall -y six
-- pip install six>=1.12.0
-- pip install -r requirements-test.txt
-- pip install --prefer-binary -e .
-install:
-- if: env(TRAVIS_PYTHON_VERSION) =~ '^2.7'
-- pip install rsa<=4.1
+install: ./.travis_install_phase.sh
 script: python setup.py test
