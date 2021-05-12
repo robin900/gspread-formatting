@@ -1,4 +1,3 @@
-rsa<=4.1
 nose
 oauth2client
 pandas
