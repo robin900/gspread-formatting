@@ -226,6 +226,7 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(ue_fmt.textFormat.bold, True)
         # userEnteredFormat will not have backgroundColorStyle...
         eff_fmt = get_effective_format(self.sheet, 'A1')
+        import pdb; pdb.set_trace()
         self.assertEqual(eff_fmt.textFormat.bold, True)
         # effectiveFormat will have backgroundColorStyle...
         self.assertEqual(eff_fmt.backgroundColorStyle.rgbColor.red, 1)
@@ -316,6 +317,36 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(eff_fmt.numberFormat.pattern, ' DD MM YYYY')
         dt = self.sheet.acell('A1').value
         self.assertEqual(dt, ' 01 09 2018')
+
+    def test_blank_color_as_black(self):
+        rows = [
+            ["A", "B", "C", "D"],
+            ["1", "2", "3", "4"],
+            ["A", "B", "C", "D"],
+            ["TRUE", "FALSE", "FALSE", "TRUE"],
+        ]
+        cell_list = self.sheet.range('A1:D4')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+        fmt = CellFormat(backgroundColor=Color(0,0,0,1))
+        format_cell_range(self.sheet, '1:1', fmt)
+        ue_fmt = get_user_entered_format(self.sheet, 'A1')
+        self.assertEqual(ue_fmt.backgroundColor, Color(0,0,0,1))
+        self.assertEqual(ue_fmt.backgroundColor, Color())
+        fmt = CellFormat(backgroundColor=Color(red=1))
+        format_cell_range(self.sheet, '1:1', fmt)
+        ue_fmt = get_user_entered_format(self.sheet, 'A1')
+        self.assertEqual(ue_fmt.backgroundColor, Color(1,0,0,1))
+        self.assertEqual(ue_fmt.backgroundColor, Color(red=1))
+        fmt = CellFormat(backgroundColor=Color())
+        format_cell_range(self.sheet, '1:1', fmt)
+        ue_fmt = get_user_entered_format(self.sheet, 'A1')
+        eff_fmt = get_effective_format(self.sheet, 'A1')
+        import pdb; pdb.set_trace()
+        self.assertEqual(ue_fmt.backgroundColor, Color(0,0,0,1))
+        self.assertEqual(ue_fmt.backgroundColor, Color())
+
 
     def test_data_validation_rule(self):
         rows = [
@@ -416,6 +447,44 @@ class WorksheetTest(GspreadTest):
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(list(current_rules), [])
 
+    def test_conditionals_issue_31(self):
+        rules = [
+            ConditionalFormatRule(
+                ranges=[GridRange(self.sheet.id, 1, 1, 1, 2)],
+                booleanRule=BooleanRule(
+                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#000000")))
+                )
+            ),
+            ConditionalFormatRule(
+                ranges=[GridRange(self.sheet.id, 2, 3, 2, 3)],
+                booleanRule=BooleanRule(
+                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#00FFFF")))
+                )
+            ),
+            ConditionalFormatRule(
+                ranges=[GridRange(self.sheet.id, 1, 2, 1, 3)],
+                booleanRule=BooleanRule(
+                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#FFFF00")))
+                )
+            )
+        ]
+        rows = [
+            ["A", "B", "C", "D"],
+            ["1", "2", "3", "4"]
+        ]
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        current_rules = get_conditional_format_rules(self.sheet)
+        current_rules.extend(rules)
+        self.assertNotEqual(current_rules.save(), None)
+        current_rules_fetched = get_conditional_format_rules(self.sheet)
+        import pdb; pdb.set_trace()
+        self.assertEqual(list(current_rules_fetched), list(current_rules))
+        
     def test_dataframe_formatter(self):
         rows = [  
             {
