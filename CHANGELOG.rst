@@ -2,6 +2,43 @@ Changelog
 =========
 
 
+v1.0.0 (2021-05-13)
+-------------------
+- Bump to v1.0.0. [Robin Thomas]
+- Fix for #31 (#32) [Robin Thomas]
+
+  Fixes #31. Allows for Sheets API's tendency to include empty objects
+  for default color values in API responses.
+- No longer CI with pypy. [Robin Thomas]
+- Revert "Attempt to constrain use of old rsa pkg to 2.7 CI build, and
+  also" [Robin Thomas]
+
+  This reverts commit 5cc83c67036ba5d004de997b613a34e9a8550f24.
+- Revert "Attempt to constrain use of old rsa pkg to 2.7 CI build, and
+  also" [Robin Thomas]
+
+  This reverts commit 5cc83c67036ba5d004de997b613a34e9a8550f24.
+- Revert "Try TravisCI conditional use of rsa<=4.1 again" [Robin Thomas]
+
+  This reverts commit b8ecaad65f0876385a1585237d756ee1fd450fb0.
+- Oops use rsa<4.1. [Robin Thomas]
+- Try TravisCI conditional use of rsa<=4.1 again. [Robin Thomas]
+- Attempt to constrain use of old rsa pkg to 2.7 CI build, and also
+  avoid the github dependabot alert. [Robin Thomas]
+- Pin rsa to < 4.1 so that Python 2.7 CI can still run. [Robin Thomas]
+- Added paranoid test of absent sheetId in GridRange props, to prevent
+  accidental regression. [Robin Thomas]
+- Improved, more concise code for Color.fromHex and .toHex(). [Robin
+  Thomas]
+- Tighten up travis install. [Robin Thomas]
+- Try explicit directory caching to make pip cache work as expected for
+  pandas wheel. [Robin Thomas]
+- Add 3.9 to travis. [Robin Thomas]
+- Pin six to >=1.12.0 in travis to avoid weird environmental dependency
+  problem. [Robin Thomas]
+- Move to travis-ci.com. [Robin Thomas]
+
+
 v0.3.7 (2020-11-23)
 -------------------
 - Bump to v0.3.7. [Robin Thomas]
