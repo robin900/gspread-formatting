@@ -254,12 +254,11 @@ class WorksheetTest(GspreadTest):
         fmt = cellFormat(textFormat=textFormat(bold=True))
         format_cell_ranges(self.sheet, [('A1:B6', fmt), ('C1:D6', fmt)])
 
-        import pdb; pdb.set_trace()
         orig_fmt = get_user_entered_format(self.sheet, 'A1')
         new_fmt = cellFormat(borders=borders(bottom=border('SOLID')), padding=padding(bottom=3))
         format_cell_range(self.sheet, 'A1:A1', new_fmt)
+        # Sheets API bug: user entered format will now contain default color and colorStyle.rgbColor
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
-        self.assertEqual(ue_fmt, fmt + new_fmt)
         self.assertEqual(new_fmt.borders.bottom.style, ue_fmt.borders.bottom.style)
         self.assertEqual(new_fmt.padding.bottom, ue_fmt.padding.bottom)
         eff_fmt = get_effective_format(self.sheet, 'A1')
@@ -427,14 +426,27 @@ class WorksheetTest(GspreadTest):
         # re-saving _always_ sends a request to API, even if no local changes made
         self.assertNotEqual(current_rules.save(), None)
         current_rules = get_conditional_format_rules(self.sheet)
-        self.assertEqual(list(current_rules), [new_rule, new_rule_2])
+        self.assertEqual(
+            current_rules.rules[0].booleanRule.format.textFormat.bold, 
+            new_rule.booleanRule.format.textFormat.bold
+        )
+        self.assertEqual(
+            current_rules.rules[1].gradientRule.maxpoint.colorStyle.themeColor, 
+            new_rule_2.gradientRule.maxpoint.colorStyle.themeColor, 
+        )
         current_rules[0] = new_rule_2
         del current_rules[1]
         current_rules.append(new_rule)
-        self.assertEqual(list(current_rules), [new_rule_2, new_rule])
         self.assertNotEqual(current_rules.save(), None)
         current_rules = get_conditional_format_rules(self.sheet)
-        self.assertEqual(list(current_rules), [new_rule_2, new_rule])
+        self.assertEqual(
+            current_rules.rules[1].booleanRule.format.textFormat.bold, 
+            new_rule.booleanRule.format.textFormat.bold
+        )
+        self.assertEqual(
+            current_rules.rules[0].gradientRule.maxpoint.colorStyle.themeColor, 
+            new_rule_2.gradientRule.maxpoint.colorStyle.themeColor, 
+        )
 
         bold_fmt = get_effective_format(self.sheet, 'A1')
         normal_fmt = get_effective_format(self.sheet, 'C1')
@@ -452,21 +464,21 @@ class WorksheetTest(GspreadTest):
             ConditionalFormatRule(
                 ranges=[GridRange(self.sheet.id, 1, 1, 1, 2)],
                 booleanRule=BooleanRule(
-                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    BooleanCondition('NUMBER_EQ', ['1']),
                     CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#000000")))
                 )
             ),
             ConditionalFormatRule(
                 ranges=[GridRange(self.sheet.id, 2, 3, 2, 3)],
                 booleanRule=BooleanRule(
-                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    BooleanCondition('NUMBER_EQ', ['1']),
                     CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#00FFFF")))
                 )
-            ),
+           ),
             ConditionalFormatRule(
                 ranges=[GridRange(self.sheet.id, 1, 2, 1, 3)],
                 booleanRule=BooleanRule(
-                    BooleanCondition('NUMBER_EQ', ['1']), 
+                    BooleanCondition('NUMBER_EQ', ['1']),
                     CellFormat(textFormat=TextFormat(foregroundColor=Color.fromHex("#FFFF00")))
                 )
             )
@@ -482,8 +494,20 @@ class WorksheetTest(GspreadTest):
         current_rules.extend(rules)
         self.assertNotEqual(current_rules.save(), None)
         current_rules_fetched = get_conditional_format_rules(self.sheet)
-        self.assertEqual(list(current_rules_fetched), list(current_rules))
-        
+        self.assertEqual(
+            current_rules_fetched.rules[0].booleanRule.format.textFormat.foregroundColor,
+            current_rules.rules[0].booleanRule.format.textFormat.foregroundColor
+        )
+        self.assertEqual(
+            current_rules_fetched.rules[1].booleanRule.format.textFormat.foregroundColor,
+            current_rules.rules[1].booleanRule.format.textFormat.foregroundColor
+        )
+        self.assertEqual(
+            current_rules_fetched.rules[2].booleanRule.format.textFormat.foregroundColor,
+            current_rules.rules[2].booleanRule.format.textFormat.foregroundColor
+        )
+
+
     def test_dataframe_formatter(self):
         rows = [  
             {
