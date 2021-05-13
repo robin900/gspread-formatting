@@ -7,6 +7,7 @@ import re
                   
 class FormattingComponent(object):
     _FIELDS = ()
+    _DEFAULTS = {}
 
     @classmethod
     def from_props(cls, props):
@@ -29,15 +30,21 @@ class FormattingComponent(object):
     def to_props(self):
         p = {}
         for a in self._FIELDS:
-            if getattr(self, a) is not None:
-                p[a] = _extract_props(getattr(self, a))
+            v = getattr(self, a, None)
+            if v is None:
+                v = self._DEFAULTS.get(a)
+            if v is not None:
+                p[a] = _extract_props(v)
         return p
 
     def affected_fields(self, prefix):
         fields = []
         for a in self._FIELDS:
-            if getattr(self, a) is not None:
-                fields.extend( _extract_fieldrefs(a, getattr(self, a), prefix) )
+            v = getattr(self, a, None)
+            if v is None:
+                v = self._DEFAULTS.get(a)
+            if v is not None:
+                fields.extend( _extract_fieldrefs(a, v, prefix) )
         return fields
 
     def __eq__(self, other):
@@ -45,7 +52,11 @@ class FormattingComponent(object):
             return False
         for a in self._FIELDS:
             self_v = getattr(self, a, None)
+            if self_v == None:
+                self_v = self._DEFAULTS.get(a)
             other_v = getattr(other, a, None)
+            if other_v == None:
+                other_v = other._DEFAULTS.get(a)
             if self_v != other_v:
                 return False
         return True
@@ -170,10 +181,8 @@ class NumberFormat(CellFormatComponent):
 
     TYPES = set(['TEXT', 'NUMBER', 'PERCENT', 'CURRENCY', 'DATE', 'TIME', 'DATE_TIME', 'SCIENTIFIC'])
 
-    def __init__(self, type, pattern=None):
-        if type.upper() not in NumberFormat.TYPES:
-            raise ValueError("NumberFormat.type must be one of: %s" % NumberFormat.TYPES)
-        self.type = type.upper()
+    def __init__(self, type=None, pattern=None):
+        self.type = _parse_string_enum('type', type, NumberFormat.TYPES, True)
         self.pattern = pattern
 
 class ColorStyle(CellFormatComponent):
@@ -189,6 +198,12 @@ class ColorStyle(CellFormatComponent):
 class Color(CellFormatComponent):
     _HEX_PATTERN = re.compile(r'^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})?$', re.IGNORECASE)
     _FIELDS = ('red', 'green', 'blue', 'alpha')
+    _DEFAULTS = {
+        'red': 0.0,
+        'green': 0.0,
+        'blue': 0.0,
+        'alpha': 1.0
+    }
 
     def __init__(self, red=None, green=None, blue=None, alpha=None):
         self.red = red
@@ -216,10 +231,8 @@ class Border(CellFormatComponent):
 
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
 
-    def __init__(self, style, color=None, width=None, colorStyle=None):
-        if style.upper() not in Border.STYLES:
-            raise ValueError("Border.style must be one of: %s" % Border.STYLES)
-        self.style = style.upper()
+    def __init__(self, style=None, color=None, width=None, colorStyle=None):
+        self.style = _parse_string_enum('style', style, Border.STYLES, True)
         self.width = width
         self.color = color
         self.colorStyle = colorStyle

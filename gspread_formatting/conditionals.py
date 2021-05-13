@@ -95,7 +95,7 @@ class BooleanRule(ConditionalFormattingComponent):
         'format': 'cellFormat'
     }
 
-    def __init__(self, condition, format):
+    def __init__(self, condition=None, format=None):
         self.condition = condition
         self.format = format
 
@@ -155,8 +155,8 @@ class BooleanCondition(ConditionalFormattingComponent):
         'BOOLEAN': (lambda x: isinstance(x, (list, tuple)) and len(x) >= 0 and len(x) <= 2)
     }
 
-    def __init__(self, type, values=()):
-        self.type = _parse_string_enum("type", type, BooleanCondition.TYPES)
+    def __init__(self, type=None, values=()):
+        self.type = _parse_string_enum("type", type, BooleanCondition.TYPES, True)
         validator = BooleanCondition.TYPES[self.type]
         if not isinstance(values, (list, tuple)):
             raise ValueError("values parameter must always be list/tuple of values, even for a single element")
@@ -185,10 +185,8 @@ class BooleanCondition(ConditionalFormattingComponent):
 class RelativeDate(FormattingComponent):
     VALUES = set(['PAST_YEAR', 'PAST_MONTH', 'PAST_WEEK', 'YESTERDAY', 'TODAY', 'TOMORROW'])
 
-    def __init__(self, value):
-        if value.upper() not in RelativeDate.VALUES:
-            raise ValueError("RelativeDate must be one of: %s" % RelativeDate.VALUES)
-        self.value = _parse_string_enum("value", value, RelativeDate.VALUES)
+    def __init__(self, value=None):
+        self.value = _parse_string_enum("value", value, RelativeDate.VALUES, True)
 
     def to_props(self):
         return self.value
@@ -210,7 +208,8 @@ class InterpolationPoint(ConditionalFormattingComponent):
         self.colorStyle = colorStyle
         self.type = _parse_string_enum("type", type, InterpolationPoint.TYPES, required=True)
         if value is None and self.type not in set(['MIN', 'MAX']):
-            raise ValueError("InterpolationPoint.type %s requires a value" % self.type)
+            raise ValueError(("InterpolationPoint.type %s requires a value of MIN or MAX "
+                "if no value specified") % self.type)
         self.value = value
 
 class GradientRule(ConditionalFormattingComponent):
@@ -220,7 +219,7 @@ class GradientRule(ConditionalFormattingComponent):
         'maxpoint': 'interpolationPoint'
     }
 
-    def __init__(self, minpoint, maxpoint, midpoint=None):
+    def __init__(self, minpoint=None, maxpoint=None, midpoint=None):
         self.minpoint = _enforce_type("minpoint", InterpolationPoint, minpoint, required=True)
         self.midpoint = _enforce_type("midpoint", InterpolationPoint, midpoint, required=False)
         self.maxpoint = _enforce_type("maxpoint", InterpolationPoint, maxpoint, required=True)
@@ -228,7 +227,7 @@ class GradientRule(ConditionalFormattingComponent):
 class ConditionalFormatRule(ConditionalFormattingComponent):
     _FIELDS = ('ranges', 'booleanRule', 'gradientRule')
 
-    def __init__(self, ranges, booleanRule=None, gradientRule=None):
+    def __init__(self, ranges=None, booleanRule=None, gradientRule=None):
         self.booleanRule = _enforce_type("booleanRule", BooleanRule, booleanRule, required=False)
         if self.booleanRule:
             if self.booleanRule.condition.type in BooleanCondition.illegal_types_for_conditional_formatting:
@@ -243,7 +242,7 @@ class ConditionalFormatRule(ConditionalFormattingComponent):
         self.ranges = [ 
             v if isinstance(v, GridRange) else GridRange.from_props(v)
             for v in ranges 
-        ]
+        ] if ranges else []
 
     def to_props(self):
         p = {
@@ -263,7 +262,7 @@ class DataValidationRule(FormattingComponent):
         'showCustomUi': bool
     }
 
-    def __init__(self, condition, inputMessage=None, strict=None, showCustomUi=None):
+    def __init__(self, condition=None, inputMessage=None, strict=None, showCustomUi=None):
         self.condition = _enforce_type("condition", BooleanCondition, condition, True)
         if self.condition.type in BooleanCondition.illegal_types_for_data_validation:
             raise ValueError(

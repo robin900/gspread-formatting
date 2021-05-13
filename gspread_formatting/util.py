@@ -98,7 +98,13 @@ def _props_to_component(class_registry, class_alias, value, none_if_empty=False)
             v = _props_to_component(class_registry, item_alias, v, True)
         if v is not None:
             kwargs[k] = v
-    return cls(**kwargs) if (kwargs or not none_if_empty) else None
+    # if our kwargs are empty and there are default values defined
+    # for properties in the class, it means to apply all the default values
+    # as kwargs.
+    if not kwargs and cls._DEFAULTS:
+        kwargs = { k: v for k, v in cls._DEFAULTS.items() }
+    rv = cls(**kwargs) if (kwargs or not none_if_empty) else None
+    return rv
 
 def _ul_repl(m):
     return '_' + m.group(1).lower()
