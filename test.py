@@ -135,6 +135,7 @@ class RangeConversionTest(unittest.TestCase):
             self.assertTrue(isinstance(exc, ValueError))
 
 class GspreadTest(unittest.TestCase):
+    maxDiff = None
     config = None
     gc = None
 
@@ -226,7 +227,6 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(ue_fmt.textFormat.bold, True)
         # userEnteredFormat will not have backgroundColorStyle...
         eff_fmt = get_effective_format(self.sheet, 'A1')
-        import pdb; pdb.set_trace()
         self.assertEqual(eff_fmt.textFormat.bold, True)
         # effectiveFormat will have backgroundColorStyle...
         self.assertEqual(eff_fmt.backgroundColorStyle.rgbColor.red, 1)
@@ -254,6 +254,7 @@ class WorksheetTest(GspreadTest):
         fmt = cellFormat(textFormat=textFormat(bold=True))
         format_cell_ranges(self.sheet, [('A1:B6', fmt), ('C1:D6', fmt)])
 
+        import pdb; pdb.set_trace()
         orig_fmt = get_user_entered_format(self.sheet, 'A1')
         new_fmt = cellFormat(borders=borders(bottom=border('SOLID')), padding=padding(bottom=3))
         format_cell_range(self.sheet, 'A1:A1', new_fmt)
@@ -343,7 +344,6 @@ class WorksheetTest(GspreadTest):
         format_cell_range(self.sheet, '1:1', fmt)
         ue_fmt = get_user_entered_format(self.sheet, 'A1')
         eff_fmt = get_effective_format(self.sheet, 'A1')
-        import pdb; pdb.set_trace()
         self.assertEqual(ue_fmt.backgroundColor, Color(0,0,0,1))
         self.assertEqual(ue_fmt.backgroundColor, Color())
 
@@ -482,7 +482,6 @@ class WorksheetTest(GspreadTest):
         current_rules.extend(rules)
         self.assertNotEqual(current_rules.save(), None)
         current_rules_fetched = get_conditional_format_rules(self.sheet)
-        import pdb; pdb.set_trace()
         self.assertEqual(list(current_rules_fetched), list(current_rules))
         
     def test_dataframe_formatter(self):
