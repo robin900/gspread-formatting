@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+v1.0.1 (2021-06-30)
+-------------------
+- Bump to v1.0.1. [Robin Thomas]
+- Fixes #33 -- 'link' property of TextFormat now supported. [Robin
+  Thomas]
+
+
 v1.0.0 (2021-05-13)
 -------------------
 - Bump to v1.0.0. [Robin Thomas]
