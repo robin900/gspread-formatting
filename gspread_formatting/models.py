@@ -260,6 +260,12 @@ class Padding(CellFormatComponent):
         self.bottom = bottom
         self.left = left
 
+class Link(CellFormatComponent):
+    _FIELDS = ('uri',)
+
+    def __init__(self, uri=None):
+        self.uri = uri
+
 class TextFormat(CellFormatComponent):
     _FIELDS = {
         'foregroundColor': 'color',
@@ -269,7 +275,8 @@ class TextFormat(CellFormatComponent):
         'italic': None,
         'strikethrough': None,
         'underline': None,
-        'foregroundColorStyle': 'colorStyle'
+        'foregroundColorStyle': 'colorStyle',
+        'link': None
     }
 
     def __init__(self,
@@ -280,7 +287,8 @@ class TextFormat(CellFormatComponent):
         italic=None,
         strikethrough=None,
         underline=None,
-        foregroundColorStyle=None
+        foregroundColorStyle=None,
+        link=None
         ):
         self.foregroundColor = foregroundColor
         self.fontFamily = fontFamily
@@ -290,6 +298,7 @@ class TextFormat(CellFormatComponent):
         self.strikethrough = strikethrough
         self.underline = underline
         self.foregroundColorStyle = foregroundColorStyle
+        self.link = link
 
 class TextRotation(CellFormatComponent):
     _FIELDS = ('angle', 'vertical')

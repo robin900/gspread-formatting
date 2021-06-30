@@ -683,6 +683,14 @@ class FormattingComponentTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             Border('BAD_STYLE')
 
+    def test_text_format_link(self):
+        TextFormat(link=None)
+        TextFormat(link=Link("https://foo.com/"))
+        tf = TextFormat(link=Link(uri="https://foo.com/"))
+        self.assertEqual("https://foo.com/", tf.link.uri)
+        tf2 = TextFormat.from_props(tf.to_props())
+        self.assertEqual(tf, tf2)
+
     def test_text_rotation_exclusion(self):
         TextRotation(angle=1)
         TextRotation(vertical=True)
