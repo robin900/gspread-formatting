@@ -143,7 +143,6 @@ class CellFormat(CellFormatComponent):
         'textFormat': None,
         'hyperlinkDisplayType': None,
         'textRotation': None,
-        'foregroundColorStyle': 'colorStyle',
         'backgroundColorStyle': 'colorStyle'
     }
 
@@ -159,7 +158,6 @@ class CellFormat(CellFormatComponent):
         textFormat=None,
         hyperlinkDisplayType=None,
         textRotation=None,
-        foregroundColorStyle=None,
         backgroundColorStyle=None
         ):
         self.numberFormat = numberFormat
@@ -173,7 +171,6 @@ class CellFormat(CellFormatComponent):
         self.textFormat = textFormat
         self.hyperlinkDisplayType = _parse_string_enum('hyperlinkDisplayType', hyperlinkDisplayType, set(['LINKED', 'PLAIN_TEXT']))
         self.textRotation = textRotation
-        self.foregroundColorStyle = foregroundColorStyle
         self.backgroundColorStyle = backgroundColorStyle
 
 class NumberFormat(CellFormatComponent):
@@ -227,6 +224,7 @@ class Color(CellFormatComponent):
         return '#{0}{1}{2}{3}'.format(RR, GG, BB, (AA if self.alpha != None else ''))
 
 class Border(CellFormatComponent):
+    # Note: 'width' field is deprecated and we wish never to serialize it.
     _FIELDS = ('style', 'color', 'colorStyle')
 
     STYLES = set(['DOTTED', 'DASHED', 'SOLID', 'SOLID_MEDIUM', 'SOLID_THICK', 'NONE', 'DOUBLE'])
