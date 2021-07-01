@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+v1.0.2 (2021-07-01)
+-------------------
+- Bump to v1.0.2. [Robin Thomas]
+- Compare model classes to json schema from discovery URI, using new
+  script; remove foregroundColorStyle from CellFormat class as it's not
+  in json schema. (Border.width is in json schema but is deprecated and
+  thus Border model class is correctly coded.) [Robin Thomas]
+
+
 v1.0.1 (2021-06-30)
 -------------------
 - Bump to v1.0.1. [Robin Thomas]
