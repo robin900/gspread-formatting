@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+v1.0.3 (2021-07-13)
+-------------------
+- Bump to v1.0.3. [Robin Thomas]
+- Fixes #34. Cells with no formatting or data validation rules were
+  causing KeyError exceptions in get_effective_format() and similar
+  functions. These functions now properly return None without raising an
+  exception. [Robin Thomas]
+
+
 v1.0.2 (2021-07-01)
 -------------------
 - Bump to v1.0.2. [Robin Thomas]
