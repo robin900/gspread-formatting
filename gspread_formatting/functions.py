@@ -53,7 +53,8 @@ def get_data_validation_rule(worksheet, label):
         'ranges': [label],
         'fields': 'sheets.data.rowData.values.effectiveFormat,sheets.data.rowData.values.dataValidation'
     })
-    props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('dataValidation')
+    data = resp['sheets'][0]['data'][0]
+    props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('dataValidation')
     return DataValidationRule.from_props(props) if props else None
 
 
@@ -86,7 +87,8 @@ def get_effective_format(worksheet, label):
         'ranges': [label],
         'fields': 'sheets.data.rowData.values.effectiveFormat'
     })
-    props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('effectiveFormat')
+    data = resp['sheets'][0]['data'][0]
+    props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('effectiveFormat')
     return CellFormat.from_props(props) if props else None
 
 
@@ -112,7 +114,8 @@ def get_user_entered_format(worksheet, label):
         'ranges': [label],
         'fields': 'sheets.data.rowData.values.userEnteredFormat'
     })
-    props = resp['sheets'][0]['data'][0]['rowData'][0]['values'][0].get('userEnteredFormat')
+    data = resp['sheets'][0]['data'][0]
+    props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('userEnteredFormat')
     return CellFormat.from_props(props) if props else None
 
 

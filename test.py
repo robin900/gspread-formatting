@@ -347,6 +347,12 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(ue_fmt.backgroundColor, Color())
 
 
+    def test_empty_cell_formatting(self):
+        self.assertEqual(get_user_entered_format(self.sheet, 'A1'), None)
+        self.assertEqual(get_effective_format(self.sheet, 'A1'), None)
+        self.assertEqual(get_data_validation_rule(self.sheet, 'A1'), None)
+        
+
     def test_data_validation_rule(self):
         rows = [
             ["A", "B", "C", "D"],
