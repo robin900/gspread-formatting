@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+v1.0.4 (2021-08-12)
+-------------------
+- Bump to v1.0.4. [Robin Thomas]
+- Fixes #35. Allows for bare RelativeDate objects in the values list to
+  BooleanCondition, transforming to ConditionValue objects with
+  relativeDate. [Robin Thomas]
+
+
 v1.0.3 (2021-07-13)
 -------------------
 - Bump to v1.0.3. [Robin Thomas]
