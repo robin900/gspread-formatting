@@ -171,7 +171,11 @@ class BooleanCondition(ConditionalFormattingComponent):
             v if isinstance(v, ConditionValue) else (
                 ConditionValue.from_props(v) 
                 if isinstance(v, dict) 
-                else ConditionValue(userEnteredValue=v)
+                else (
+                    ConditionValue(relativeDate=v) 
+                    if isinstance(v, RelativeDate)
+                    else ConditionValue(userEnteredValue=v)
+                )
             )
             for v in values 
         ]

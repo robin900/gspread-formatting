@@ -426,8 +426,16 @@ class WorksheetTest(GspreadTest):
                 minpoint=InterpolationPoint(colorStyle=ColorStyle(themeColor='TEXT'), type='NUMBER', value='1')
             )
         )
+        new_rule_3 = ConditionalFormatRule(
+            ranges=[GridRange.from_a1_range('A2:D2', self.sheet)],
+            booleanRule=BooleanRule(
+                condition=BooleanCondition('DATE_AFTER', [RelativeDate('PAST_WEEK')]),
+                format=CellFormat(textFormat=TextFormat(italic=True))
+            )
+        )
         current_rules.append(new_rule)
         current_rules.append(new_rule_2)
+        current_rules.append(new_rule_3)
         self.assertNotEqual(current_rules.save(), None)
         # re-saving _always_ sends a request to API, even if no local changes made
         self.assertNotEqual(current_rules.save(), None)
@@ -440,18 +448,26 @@ class WorksheetTest(GspreadTest):
             current_rules.rules[1].gradientRule.maxpoint.colorStyle.themeColor, 
             new_rule_2.gradientRule.maxpoint.colorStyle.themeColor, 
         )
+        self.assertEqual(
+            current_rules.rules[2].booleanRule.format.textFormat.italic,
+            new_rule_3.booleanRule.format.textFormat.italic
+        )
         current_rules[0] = new_rule_2
         del current_rules[1]
         current_rules.append(new_rule)
         self.assertNotEqual(current_rules.save(), None)
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(
-            current_rules.rules[1].booleanRule.format.textFormat.bold, 
-            new_rule.booleanRule.format.textFormat.bold
-        )
-        self.assertEqual(
             current_rules.rules[0].gradientRule.maxpoint.colorStyle.themeColor, 
             new_rule_2.gradientRule.maxpoint.colorStyle.themeColor, 
+        )
+        self.assertEqual(
+            current_rules.rules[1].booleanRule.format.textFormat.italic,
+            new_rule_3.booleanRule.format.textFormat.italic
+        )
+        self.assertEqual(
+            current_rules.rules[2].booleanRule.format.textFormat.bold, 
+            new_rule.booleanRule.format.textFormat.bold
         )
 
         bold_fmt = get_effective_format(self.sheet, 'A1')
@@ -704,6 +720,13 @@ class FormattingComponentTest(unittest.TestCase):
             TextRotation(angle=1, vertical=True)
         with self.assertRaises(ValueError):
             TextRotation()
+
+    def test_condition_with_relative_date_value(self):
+        c = BooleanCondition('DATE_AFTER', [RelativeDate('PAST_WEEK')])
+        self.assertEqual('DATE_AFTER', c.type)
+        self.assertEqual('PAST_WEEK', c.values[0].relativeDate.value)
+
+
 
 class GridRangeTest(unittest.TestCase):
 
