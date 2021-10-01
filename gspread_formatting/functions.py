@@ -15,7 +15,8 @@ from gspread.urls import SPREADSHEET_URL
 from functools import wraps
 
 __all__ = (
-    'get_default_format', 'get_effective_format', 'get_user_entered_format',
+    'get_default_format', 'get_effective_format', 'get_effective_formats',
+    'get_user_entered_format',
     'get_frozen_row_count', 'get_frozen_column_count', 
     'get_data_validation_rule',
 ) + gspread_formatting.batch_update_requests.__all__
@@ -90,6 +91,47 @@ def get_effective_format(worksheet, label):
     data = resp['sheets'][0]['data'][0]
     props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('effectiveFormat')
     return CellFormat.from_props(props) if props else None
+
+
+def get_effective_formats(worksheet, cell_range):
+    """Returns a list-of-lists of CellFormat objects or Nones representing the effective 
+    formatting directives, if any, for the cells; that is a combination of default formatting, 
+    user-entered formatting, and conditional formatting.
+
+    :param worksheet: Worksheet object containing the cell whose format is desired.
+    :param cell_range: String with cell range in common format, e.g. 'A1:B2'.
+                       Letter case is ignored.
+
+    Example:
+
+    >>> get_effective_format(worksheet, 'A1:A3')
+    [[<CellFormat textFormat=(bold=True)>, None, <CellFormat textFormat=(bold=True)>]]
+    >>> get_effective_format(worksheet, 'A1:B2')
+    [[<CellFormat textFormat=(bold=True)>, None],
+     [None, <CellFormat textFormat=(bold=True)>]]
+    """
+    label = '%s!%s' % (worksheet.title, cell_range)
+
+    resp = worksheet.spreadsheet.fetch_sheet_metadata({
+        'includeGridData': True,
+        'ranges': [label],
+        'fields': 'sheets.data.rowData'
+    })
+
+    start_label, end_label = cell_range.split(':', 1)
+    start_indices = a1_to_rowcol(start_label)
+    end_indices = a1_to_rowcol(end_label)
+    height = end_indices[0] - start_indices[0] + 1
+    width = end_indices[1] - start_indices[1] + 1
+
+    res = []
+    rows = resp['sheets'][0]['data'][0].get('rowData', [])
+    for row in rows + [{'values': []}] * (height-len(rows)):
+        res_row = []
+        for cell in row['values'] + [None] * (width-len(row['values'])):
+            res_row.append(CellFormat.from_props(cell['effectiveFormat']) if cell else None)
+        res.append(res_row)
+    return res
 
 
 def get_user_entered_format(worksheet, label):
