@@ -635,7 +635,9 @@ class WorksheetTest(GspreadTest):
 
     def test_batch_updater_different_spreadsheet(self):
         batch = batch_updater(self.sheet.spreadsheet)
-        other_spread = gspread.Spreadsheet(None, {'id': 'blech', 'title': 'Other sheet'})
+        other_spread = gspread.Spreadsheet.__new__(gspread.Spreadsheet)
+        other_spread.client = self.sheet.spreadsheet.client
+        other_spread._properties = {'id': 'blech', 'title': 'Other sheet'}
         other_sheet = gspread.Worksheet(other_spread, {'sheetId': 4, 'title': 'Bleh'})
         batch.set_row_height(self.sheet, '1:5', 42)
         with self.assertRaises(ValueError):

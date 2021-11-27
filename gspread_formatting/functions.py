@@ -9,7 +9,7 @@ from gspread_formatting.batch_update_requests import *
 import gspread_formatting.batch_update_requests
 
 from gspread.utils import a1_to_rowcol, rowcol_to_a1, finditem
-from gspread.models import Spreadsheet
+from gspread import Spreadsheet
 from gspread.urls import SPREADSHEET_URL
 
 from functools import wraps
