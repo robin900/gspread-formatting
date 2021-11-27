@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+v1.0.5 (2021-11-27)
+-------------------
+- Bump to v1.0.5. [Robin Thomas]
+- Fixes #38. Avoids import errors, and also adapts test code to avoid
+  that Spreadsheet.__init__ calls fetch_sheet_metadata, working with new
+  release 5.0.0 of gspread. [Robin Thomas]
+
+
 v1.0.4 (2021-08-12)
 -------------------
 - Bump to v1.0.4. [Robin Thomas]
