@@ -412,6 +412,10 @@ class WorksheetTest(GspreadTest):
 
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(list(current_rules), [])
+
+        with self.assertRaises(ValueError):
+            current_rules.append([])
+
         new_rule = ConditionalFormatRule(
             ranges=[GridRange.from_a1_range('A1:D1', self.sheet)],
             booleanRule=BooleanRule(
@@ -477,10 +481,20 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(bool(normal_fmt.textFormat.italic), False)
 
         current_rules.clear()
+        current_rules.append(new_rule_3)
+        current_rules.save()
+        current_rules = get_conditional_format_rules(self.sheet)
+        self.assertEqual(len(current_rules), 1)
+        self.assertEqual(
+            current_rules[0].booleanRule.format.textFormat.italic, 
+            new_rule_3.booleanRule.format.textFormat.italic, 
+        )
+
+        current_rules.clear()
         current_rules.save()
         current_rules = get_conditional_format_rules(self.sheet)
         self.assertEqual(list(current_rules), [])
-
+        
     def test_conditionals_issue_31(self):
         rules = [
             ConditionalFormatRule(

@@ -46,7 +46,7 @@ class ConditionalFormatRules(MutableSequence):
         return self.rules[idx]
 
     def __setitem__(self, idx, value):
-        self.rules[idx] = value
+        self.rules[idx] = _enforce_type('rule', ConditionalFormatRule, value, True)
 
     def __delitem__(self, idx):
         del self.rules[idx]
@@ -59,7 +59,7 @@ class ConditionalFormatRules(MutableSequence):
         del self.rules[:]
 
     def insert(self, idx, value):
-        return self.rules.insert(idx, value)
+        return self.rules.insert(idx, _enforce_type('rule', ConditionalFormatRule, value, True))
 
     def save(self):
         # ideally, we would determine the longest "increasing" subsequence
