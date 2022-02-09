@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+v1.0.6 (2022-02-09)
+-------------------
+- Bump to v1.0.6. [Robin Thomas]
+- Enforce type on items added to conditional format rules sequence
+  object. [Robin Thomas]
+
+
 v1.0.5 (2021-11-27)
 -------------------
 - Bump to v1.0.5. [Robin Thomas]
