@@ -2,6 +2,17 @@ Changelog
 =========
 
 
+v1.1.0 (2022-09-27)
+-------------------
+- Bump to v1.1.0. [Robin Thomas]
+- Adds `get_right_to_left` and `set_right_to_left` functions. (#44)
+  [Robin Thomas]
+
+  * Adds `get_right_to_left` and `set_right_to_left` functions.
+  (`set_right_to_left` is also available in the batch updater.)
+  Fixes #43.
+
+
 v1.0.6 (2022-02-09)
 -------------------
 - Bump to v1.0.6. [Robin Thomas]
