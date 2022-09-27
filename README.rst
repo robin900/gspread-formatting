@@ -127,6 +127,17 @@ The following functions set the height (in pixels) of rows or width (in pixels) 
     set_column_width(worksheet, 'A:D', 100)
     set_column_widths(worksheet, [ ('A', 200), ('B:', 100) ])
 
+Working with Right-to-Left Language Alphabets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following example shows the functions to get or set the `rightToLeft` property of a worksheet:
+
+    if not get_right_to_left(worksheet):
+        set_right_to_left(worksheet, True)
+
+Also note the presence of the argument `textDirection=` to `CellFormat`: set it to `'RIGHT_TO_LEFT'`
+in order to use right-to-left text in an individual cell in an otherwise left-to-right worksheet.
+
 Getting and Setting Data Validation Rules for Cells and Cell Ranges
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
