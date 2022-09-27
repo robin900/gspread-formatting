@@ -132,8 +132,8 @@ Working with Right-to-Left Language Alphabets
 
 The following example shows the functions to get or set the `rightToLeft` property of a worksheet:
 
-    if not get_right_to_left(worksheet):
-        set_right_to_left(worksheet, True)
+    get_right_to_left(worksheet)
+    set_right_to_left(worksheet, True)
 
 Also note the presence of the argument `textDirection=` to `CellFormat`: set it to `'RIGHT_TO_LEFT'`
 in order to use right-to-left text in an individual cell in an otherwise left-to-right worksheet.
