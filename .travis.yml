@@ -10,6 +10,7 @@ before_install:
 - tar xvzf .travis.secrets.tar.gz
 install:
 - pip install -U pip
+- pip install -U importlib-metadata
 - pip uninstall -y six
 - pip install six>=1.12.0
 - pip install -r requirements-test.txt

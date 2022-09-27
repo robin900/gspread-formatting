@@ -11,7 +11,7 @@ from .util import _build_repeat_cell_request, _range_to_dimensionrange_object
 from functools import wraps
 
 __all__ = (
-    'format_cell_ranges', 'format_cell_range', 'set_frozen',
+    'format_cell_ranges', 'format_cell_range', 'set_frozen', 'set_right_to_left',
     'set_data_validation_for_cell_range', 'set_data_validation_for_cell_ranges',
     'set_row_height', 'set_row_heights',
     'set_column_width', 'set_column_widths'
@@ -147,6 +147,19 @@ def set_data_validation_for_cell_range(worksheet, range, rule):
     """
 
     return set_data_validation_for_cell_ranges(worksheet, [(range, rule)])
+
+
+def set_right_to_left(worksheet, right_to_left):
+    right_to_left = bool(right_to_left)
+    return [{
+        'updateSheetProperties': {
+            'properties': {
+                'sheetId': worksheet.id,
+                'rightToLeft': right_to_left
+            },
+            'fields': 'rightToLeft'
+        }
+    }]
 
 
 def set_frozen(worksheet, rows=None, cols=None):
