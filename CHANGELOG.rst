@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+v1.1.1 (2022-09-27)
+-------------------
+- Bump to v1.1.1. [Robin Thomas]
+- Add README documentation for right-to-left support. [Robin Thomas]
+
+
 v1.1.0 (2022-09-27)
 -------------------
 - Bump to v1.1.0. [Robin Thomas]
