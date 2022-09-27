@@ -133,10 +133,11 @@ def get_frozen_column_count(worksheet):
     return grid_props.get('frozenColumnCount')
 
 def get_right_to_left(worksheet):
+    """Returns True or False (never None) if worksheet is rightToLeft."""
     md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
     sheet_data = finditem(lambda i: i['properties']['title'] == worksheet.title, md['sheets'])
     pr = sheet_data['properties']
-    return pr.get('rightToLeft')
+    return bool(pr.get('rightToLeft'))
 
 # monkey-patch Spreadsheet class
 

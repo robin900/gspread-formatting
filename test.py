@@ -277,16 +277,15 @@ class WorksheetTest(GspreadTest):
 
     def test_right_to_left(self):
         set_right_to_left(self.sheet, True)
-        fresh = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
-        item = utils.finditem(lambda x: x['properties']['title'] == self.sheet.title, fresh['sheets'])
-        pr = item['properties']
-        self.assertEqual(pr.get('rightToLeft'), True)
+        self.assertEqual(get_right_to_left(self.sheet), True)
         set_right_to_left(self.sheet, False)
+        # Important! Sheets API will omit rightToLeft from sheet properies when it's False
+        # but our function guarantees boolean return
+        self.assertEqual(get_right_to_left(self.sheet), False)
         fresh = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
         item = utils.finditem(lambda x: x['properties']['title'] == self.sheet.title, fresh['sheets'])
+        # but underneath, property is absent
         pr = item['properties']
-        # Important! Sheets API will omit rightToLeft from sheet properies when it's False
-        self.assertEqual(pr.get('rightToLeft'), None)
         self.assertTrue('rightToLeft' not in pr)
 
     def test_format_props_roundtrip(self):
