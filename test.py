@@ -275,6 +275,20 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(get_frozen_row_count(self.sheet), 1)
         self.assertEqual(get_frozen_column_count(self.sheet), 1)
 
+    def test_right_to_left(self):
+        set_right_to_left(self.sheet, True)
+        fresh = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
+        item = utils.finditem(lambda x: x['properties']['title'] == self.sheet.title, fresh['sheets'])
+        pr = item['properties']
+        self.assertEqual(pr.get('rightToLeft'), True)
+        set_right_to_left(self.sheet, False)
+        fresh = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
+        item = utils.finditem(lambda x: x['properties']['title'] == self.sheet.title, fresh['sheets'])
+        pr = item['properties']
+        # Important! Sheets API will omit rightToLeft from sheet properies when it's False
+        self.assertEqual(pr.get('rightToLeft'), None)
+        self.assertTrue('rightToLeft' not in pr)
+
     def test_format_props_roundtrip(self):
         fmt = cellFormat(backgroundColor=Color(1,0,1),textFormat=textFormat(italic=False))
         fmt_roundtrip = CellFormat.from_props(fmt.to_props())

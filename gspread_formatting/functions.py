@@ -16,7 +16,7 @@ from functools import wraps
 
 __all__ = (
     'get_default_format', 'get_effective_format', 'get_user_entered_format',
-    'get_frozen_row_count', 'get_frozen_column_count', 
+    'get_frozen_row_count', 'get_frozen_column_count', 'get_right_to_left',
     'get_data_validation_rule',
 ) + gspread_formatting.batch_update_requests.__all__
 
@@ -132,6 +132,11 @@ def get_frozen_column_count(worksheet):
     grid_props = sheet_data['properties']['gridProperties']
     return grid_props.get('frozenColumnCount')
 
+def get_right_to_left(worksheet):
+    md = worksheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
+    sheet_data = finditem(lambda i: i['properties']['title'] == worksheet.title, md['sheets'])
+    pr = sheet_data['properties']
+    return pr.get('rightToLeft')
 
 # monkey-patch Spreadsheet class
 
