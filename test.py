@@ -635,6 +635,29 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(1, get_frozen_row_count(self.sheet))
         self.assertEqual(2, get_frozen_column_count(self.sheet))
 
+    def test_dataframe_formatter_no_column_header(self):
+        rows = [  
+            {
+                'i': i,
+                'j': i * 2,
+                'A': 'Label ' + str(i), 
+                'B': i * 100 + 2.34, 
+                'C': date(2019, 3, i % 31 + 1), 
+                'D': datetime(2019, 3, i % 31 + 1, i % 24, i % 60, i % 60),
+                'E': i * 1000 + 7.8001, 
+            } 
+            for i in range(200) 
+        ]
+        df = pd.DataFrame.from_records(rows, index=['i', 'j'])
+        set_with_dataframe(self.sheet, df, include_index=True, include_column_header=False)
+        format_with_dataframe(
+            self.sheet, 
+            df, 
+            formatter=DEFAULT_FORMATTER,
+            include_index=True,
+            include_column_header=False
+        )
+
     def test_row_height_and_column_width(self):
         set_row_height(self.sheet, '1:5', 42)
         set_column_width(self.sheet, 'A', 187)
