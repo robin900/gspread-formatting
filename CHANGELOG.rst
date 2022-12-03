@@ -2,6 +2,17 @@ Changelog
 =========
 
 
+v1.1.2 (2022-12-03)
+-------------------
+- Bump to v1.1.2. [Robin Thomas]
+- Added test coverage of include_column_header=False case. [Robin
+  Thomas]
+- Fix exception when include_column_header=False. [pomcho555]
+
+  UnboundLocalError would occur, because freeze_args is defined in the wrong place. Fixed.
+- Fixed formatting issue with RTL section of README. [Robin Thomas]
+
+
 v1.1.1 (2022-09-27)
 -------------------
 - Bump to v1.1.1. [Robin Thomas]
