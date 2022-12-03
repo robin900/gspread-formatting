@@ -84,6 +84,7 @@ def _format_with_dataframe(worksheet,
         )
         formatting_ranges.append( (range, column_fmt) )
 
+    freeze_args = {}
     if include_column_header:
         # TODO allow for multi-index columns object
         elts = list(dataframe.columns)
@@ -117,8 +118,6 @@ def _format_with_dataframe(worksheet,
                     header_fmt
                 )
             )
-
-        freeze_args = {}
 
         if row == 1 and formatter.should_freeze_header(elts, dataframe):
             freeze_args['rows'] = column_header_size
