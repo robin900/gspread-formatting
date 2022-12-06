@@ -130,7 +130,7 @@ The following functions set the height (in pixels) of rows or width (in pixels) 
 Working with Right-to-Left Language Alphabets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following example shows the functions to get or set the `rightToLeft` property of a worksheet:
+The following example shows the functions to get or set the `rightToLeft` property of a worksheet::
 
     get_right_to_left(worksheet)
     set_right_to_left(worksheet, True)
