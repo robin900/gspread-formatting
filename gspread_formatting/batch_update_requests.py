@@ -14,7 +14,7 @@ __all__ = (
     'format_cell_ranges', 'format_cell_range', 'set_frozen', 'set_right_to_left',
     'set_data_validation_for_cell_range', 'set_data_validation_for_cell_ranges',
     'set_row_height', 'set_row_heights',
-    'set_column_width', 'set_column_widths'
+    'set_column_width', 'set_column_widths', 'hide_show_column', 'hide_show_columns'
 )
 
 
@@ -73,6 +73,33 @@ def set_column_widths(worksheet, ranges):
         }
         for range, width in ranges
     ]
+
+
+def hide_show_columns(worksheet, ranges, hide: bool):
+    """Hide a column or range of columns in the given ``Worksheet`` 
+
+    :param worksheet: The ``Worksheet`` object.
+    :param ranges: An iterable whose elements are ranges to hide
+
+    """
+
+    return [
+        { 
+            'updateDimensionProperties': { 
+                'range': _range_to_dimensionrange_object(range, worksheet.id), 
+                "properties": {
+                "hiddenByUser": hide,
+                },
+                "fields": 'hiddenByUser', 
+            } 
+        }
+        for range in ranges
+    ]
+
+def hide_show_column(worksheet, column, hide: bool):
+    """Hide one range of columns
+    """
+    return hide_show_columns(worksheet, [column], hide)
 
 
 def set_column_width(worksheet, label, width):
