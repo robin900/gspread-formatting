@@ -75,33 +75,6 @@ def set_column_widths(worksheet, ranges):
     ]
 
 
-def hide_show_columns(worksheet, ranges, hide: bool):
-    """Hide a column or range of columns in the given ``Worksheet`` 
-
-    :param worksheet: The ``Worksheet`` object.
-    :param ranges: An iterable whose elements are ranges to hide
-
-    """
-
-    return [
-        { 
-            'updateDimensionProperties': { 
-                'range': _range_to_dimensionrange_object(range, worksheet.id), 
-                "properties": {
-                "hiddenByUser": hide,
-                },
-                "fields": 'hiddenByUser', 
-            } 
-        }
-        for range in ranges
-    ]
-
-def hide_show_column(worksheet, column, hide: bool):
-    """Hide one range of columns
-    """
-    return hide_show_columns(worksheet, [column], hide)
-
-
 def set_column_width(worksheet, label, width):
     """Update a column or range of columns in the given ``Worksheet`` 
     to have the specified width in pixels.
@@ -210,3 +183,30 @@ def set_frozen(worksheet, rows=None, cols=None):
         }
     }]
 
+
+def hide_show_columns(worksheet, ranges, hide: bool):
+    """Hide a column or range of columns in the given ``Worksheet`` 
+
+    :param worksheet: The ``Worksheet`` object.
+    :param ranges: An iterable whose elements are ranges to hide
+    :param hide: a  boolean, function hides columns if True, shows columns if False
+    """
+
+    return [
+        { 
+            'updateDimensionProperties': { 
+                'range': _range_to_dimensionrange_object(range, worksheet.id), 
+                "properties": {
+                "hiddenByUser": hide,
+                },
+                "fields": 'hiddenByUser', 
+            } 
+        }
+        for range in ranges
+    ]
+
+
+def hide_show_column(worksheet, column, hide: bool):
+    """Hide one range of columns
+    """
+    return hide_show_columns(worksheet, [column], hide)
