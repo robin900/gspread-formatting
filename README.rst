@@ -38,7 +38,7 @@ to learn more about each formatting component.::
 
     from gspread_formatting import *
 
-    fmt = cellFormat(
+    fmt = CellFormat(
         backgroundColor=color(1, 0.9, 0.9),
         textFormat=textFormat(bold=True, foregroundColor=color(1, 0, 1)),
         horizontalAlignment='CENTER'
@@ -49,13 +49,13 @@ to learn more about each formatting component.::
 The ``format_cell_ranges`` function allows for formatting multiple ranges with corresponding formats,
 all in one function call and Sheets API operation::
 
-    fmt = cellFormat(
+    fmt = CellFormat(
         backgroundColor=color(1, 0.9, 0.9),
         textFormat=textFormat(bold=True, foregroundColor=color(1, 0, 1)),
         horizontalAlignment='CENTER'
         )
 
-    fmt2 = cellFormat(
+    fmt2 = CellFormat(
         backgroundColor=color(0.9, 0.9, 0.9),
         horizontalAlignment='RIGHT'
         )
@@ -212,13 +212,13 @@ as a context manager in a ``with:`` block, which will automate the call to ``.ex
 
     # Option 1: call execute() directly
     batch = batch_updater(sheet.spreadsheet)
-    batch.format_cell_range(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+    batch.format_cell_range(sheet, '1', CellFormat(textFormat=textFormat(bold=True)))
     batch.set_row_height(sheet, '1', 32)
     batch.execute()
 
     # Option 2: use with: block
     with batch_updater(sheet.spreadsheet) as batch:
-        batch.format_cell_range(sheet, '1', cellFormat(textFormat=textFormat(bold=True)))
+        batch.format_cell_range(sheet, '1', CellFormat(textFormat=textFormat(bold=True)))
         batch.set_row_height(sheet, '1', 32)
 
 
