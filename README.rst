@@ -25,6 +25,7 @@ See the section below for usage and details.
 Usage
 ~~~~~
 
+
 Basic formatting of a range of cells in a worksheet is offered by the ``format_cell_range`` function. 
 All basic formatting components of the v4 Sheets API's ``CellFormat`` are present as classes 
 in the ``gspread_formatting`` module, available both by ``InitialCaps`` names and ``camelCase`` names: 
