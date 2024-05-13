@@ -33,7 +33,7 @@ for example, the background color class is ``BackgroundColor`` but is also avail
 Attributes of formatting components are best specified as keyword arguments using ``camelCase`` 
 naming, e.g. ``backgroundColor=...``. Complex formats may be composed easily, by nesting the calls to the classes.  
 
-See `the CellFormat page of the Sheets API documentation <https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets#CellFormat>`_
+See `the CellFormat page of the Sheets API documentation <https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/cells#CellFormat>`_
 to learn more about each formatting component.::
 
     from gspread_formatting import *
