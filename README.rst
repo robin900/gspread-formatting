@@ -4,15 +4,8 @@ gspread-formatting
 .. image:: https://badge.fury.io/py/gspread-formatting.svg
     :target: https://badge.fury.io/py/gspread-formatting
 
-.. image:: https://travis-ci.com/robin900/gspread-formatting.svg?branch=master
-    :target: https://travis-ci.com/robin900/gspread-formatting
-
 .. image:: https://img.shields.io/pypi/dm/gspread-formatting.svg
     :target: https://pypi.org/project/gspread-formatting
-
-.. image:: https://readthedocs.org/projects/gspread-formatting/badge/?version=latest
-    :target: https://gspread-formatting.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
 
 This package provides complete cell formatting for Google spreadsheets
 using the popular ``gspread`` package, along with a few related features such as setting
