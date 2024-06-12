@@ -2,6 +2,17 @@ Changelog
 =========
 
 
+v1.2.0 (2024-06-12)
+-------------------
+- Bump to v1.2.0. [Robin Thomas]
+- Add TextFormatRun support (#57) [Robin Thomas]
+
+  Fixes #54.
+- Remove unneeded badges. [Robin Thomas]
+- Fix Google Sheets docs URL in README (#55) [Matt Black]
+- Formatting correction in README. [Robin Thomas]
+
+
 v1.1.2 (2022-12-03)
 -------------------
 - Bump to v1.1.2. [Robin Thomas]
