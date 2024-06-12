@@ -298,6 +298,13 @@ class TextFormat(CellFormatComponent):
         self.foregroundColorStyle = foregroundColorStyle
         self.link = link
 
+class TextFormatRun(FormattingComponent):
+    _FIELDS = ('startIndex', 'textFormat')
+
+    def __init__(self, startIndex, textFormat):
+        self.startIndex = startIndex
+        self.textFormat = textFormat
+
 class TextRotation(CellFormatComponent):
     _FIELDS = ('angle', 'vertical')
 

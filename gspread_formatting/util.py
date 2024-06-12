@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import re 
 
-def _build_repeat_cell_request(worksheet, range, cell_format, celldata_field='userEnteredFormat'):
+def _build_repeat_cell_request(worksheet, range, formatting_object, celldata_field='userEnteredFormat'):
     return {
         'repeatCell': {
             'range': _range_to_gridrange_object(range, worksheet.id),
-            'cell': { celldata_field: cell_format.to_props() if cell_format != None else None },
-            'fields': ",".join(cell_format.affected_fields(celldata_field)) if cell_format != None else celldata_field
+            'cell': { celldata_field: formatting_object.to_props() if formatting_object != None else None },
+            'fields': ",".join(formatting_object.affected_fields(celldata_field)) if formatting_object != None else celldata_field
         }
     }
 

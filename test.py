@@ -33,6 +33,15 @@ try:
 except NameError:
     basestring = unicode = str
 
+# making a Worksheet object without fetching it from API changed in 6.0.0.
+
+if gspread.__version__ < '6.0.0':
+    def make_worksheet_object(spreadsheet, props):
+        return gspread.Worksheet(spreadsheet, props)
+else:
+    def make_worksheet_object(spreadsheet, props):
+        return gspread.Worksheet(spreadsheet, props, spreadsheet.id, spreadsheet.client)
+
 
 CONFIG_FILENAME = os.path.join(os.path.dirname(__file__), 'tests.config')
 CREDS_FILENAME = os.path.join(os.path.dirname(__file__), 'creds.json')
@@ -688,7 +697,7 @@ class WorksheetTest(GspreadTest):
         other_spread = gspread.Spreadsheet.__new__(gspread.Spreadsheet)
         other_spread.client = self.sheet.spreadsheet.client
         other_spread._properties = {'id': 'blech', 'title': 'Other sheet'}
-        other_sheet = gspread.Worksheet(other_spread, {'sheetId': 4, 'title': 'Bleh'})
+        other_sheet = make_worksheet_object(other_spread, {'sheetId': 4, 'title': 'Bleh'})
         batch.set_row_height(self.sheet, '1:5', 42)
         with self.assertRaises(ValueError):
             batch.set_row_height(other_sheet, '1:5', 42)
