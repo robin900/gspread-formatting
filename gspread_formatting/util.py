@@ -1,12 +1,30 @@
 # -*- coding: utf-8 -*-
+from functools import reduce
+from operator import or_
 import re 
+
+def _convert_to_properties(fobj):
+    if isinstance(fobj, list):
+        return [i.to_props() for i in fobj]
+    elif fobj != None:
+        return fobj.to_props()
+    else:
+        return None
+
+def _affected_fields_for(fobj, field_name):
+    if isinstance(fobj, list):
+        return list(reduce(or_, [set(i.affected_fields(field_name)) for i in fobj]))
+    elif fobj != None:
+        return fobj.affected_fields(field_name)
+    else:
+        return [field_name]
 
 def _build_repeat_cell_request(worksheet, range, formatting_object, celldata_field='userEnteredFormat'):
     return {
         'repeatCell': {
             'range': _range_to_gridrange_object(range, worksheet.id),
-            'cell': { celldata_field: formatting_object.to_props() if formatting_object != None else None },
-            'fields': ",".join(formatting_object.affected_fields(celldata_field)) if formatting_object != None else celldata_field
+            'cell': { celldata_field: _convert_to_properties(formatting_object) },
+            'fields': ",".join(_affected_fields_for(formatting_object, celldata_field))
         }
     }
 

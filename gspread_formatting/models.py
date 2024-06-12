@@ -3,9 +3,10 @@
 from .util import _props_to_component, _extract_props, _extract_fieldrefs, \
     _parse_string_enum, _underlower, _range_to_gridrange_object
 
+import abc
 import re
                   
-class FormattingComponent(object):
+class FormattingComponent(abc.ABC):
     _FIELDS = ()
     _DEFAULTS = {}
 
@@ -127,7 +128,7 @@ class GridRange(FormattingComponent):
         self.startColumnIndex = startColumnIndex
         self.endColumnIndex = endColumnIndex
 
-class CellFormatComponent(FormattingComponent):
+class CellFormatComponent(FormattingComponent, abc.ABC):
     pass
 
 class CellFormat(CellFormatComponent):
@@ -299,11 +300,11 @@ class TextFormat(CellFormatComponent):
         self.link = link
 
 class TextFormatRun(FormattingComponent):
-    _FIELDS = ('startIndex', 'textFormat')
+    _FIELDS = {'format': 'textFormat', 'startIndex': None}
 
-    def __init__(self, startIndex, textFormat):
+    def __init__(self, format, startIndex=0):
         self.startIndex = startIndex
-        self.textFormat = textFormat
+        self.format = format if format is not None else TextFormat()
 
 class TextRotation(CellFormatComponent):
     _FIELDS = ('angle', 'vertical')
@@ -317,7 +318,7 @@ class TextRotation(CellFormatComponent):
 # provide camelCase aliases for all component classes.
 
 _CLASSES = {}
-for _c in [ obj for name, obj in locals().items() if isinstance(obj, type) and issubclass(obj, CellFormatComponent) ]:
+for _c in [ obj for name, obj in locals().items() if isinstance(obj, type) and issubclass(obj, FormattingComponent)]:
     _k = _underlower(_c.__name__)
     _CLASSES[_k] = _c
     locals()[_k] = _c
