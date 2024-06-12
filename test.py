@@ -33,6 +33,15 @@ try:
 except NameError:
     basestring = unicode = str
 
+# making a Worksheet object without fetching it from API changed in 6.0.0.
+
+if gspread.__version__ < '6.0.0':
+    def make_worksheet_object(spreadsheet, props):
+        return gspread.Worksheet(spreadsheet, props)
+else:
+    def make_worksheet_object(spreadsheet, props):
+        return gspread.Worksheet(spreadsheet, props, spreadsheet.id, spreadsheet.client)
+
 
 CONFIG_FILENAME = os.path.join(os.path.dirname(__file__), 'tests.config')
 CREDS_FILENAME = os.path.join(os.path.dirname(__file__), 'creds.json')
@@ -683,12 +692,30 @@ class WorksheetTest(GspreadTest):
         for col in col_md[0:1]:
             self.assertEqual(187, col['pixelSize'])
 
+    def test_text_format_runs(self):
+        rows = [
+            ["Label A", "B", "C", "D"],
+            ["1", "2", "3", "4"]
+        ]
+        cell_list = self.sheet.range('A1:D2')
+        for cell, value in zip(cell_list, itertools.chain(*rows)):
+            cell.value = value
+        self.sheet.update_cells(cell_list, value_input_option='USER_ENTERED')
+
+        runs = [TextFormatRun(startIndex=0, format=TextFormat(bold=True)), TextFormatRun(startIndex=6, format=TextFormat(italic=True))]
+        with batch_updater(self.sheet.spreadsheet) as batch:
+            batch.set_text_format_runs(self.sheet, 'A1', runs)
+        fetched_runs = get_text_format_runs(self.sheet, 'A1')
+        self.assertEqual(runs, fetched_runs)
+        fetched_runs = get_text_format_runs(self.sheet, 'A2')
+        self.assertEqual([], fetched_runs)
+
     def test_batch_updater_different_spreadsheet(self):
         batch = batch_updater(self.sheet.spreadsheet)
         other_spread = gspread.Spreadsheet.__new__(gspread.Spreadsheet)
         other_spread.client = self.sheet.spreadsheet.client
         other_spread._properties = {'id': 'blech', 'title': 'Other sheet'}
-        other_sheet = gspread.Worksheet(other_spread, {'sheetId': 4, 'title': 'Bleh'})
+        other_sheet = make_worksheet_object(other_spread, {'sheetId': 4, 'title': 'Bleh'})
         batch.set_row_height(self.sheet, '1:5', 42)
         with self.assertRaises(ValueError):
             batch.set_row_height(other_sheet, '1:5', 42)

@@ -13,6 +13,7 @@ from functools import wraps
 __all__ = (
     'format_cell_ranges', 'format_cell_range', 'set_frozen', 'set_right_to_left',
     'set_data_validation_for_cell_range', 'set_data_validation_for_cell_ranges',
+    'set_text_format_runs',
     'set_row_height', 'set_row_heights',
     'set_column_width', 'set_column_widths'
 )
@@ -87,7 +88,17 @@ def set_column_width(worksheet, label, width):
 
     return set_column_widths(worksheet, [(label, width)])
 
-      
+
+def set_text_format_runs(worksheet, label, runs):
+    """For the given cell (or cell range)
+
+    :param worksheet: The ``Worksheet`` object.
+    :param label: string representing a single cell or range of cells, e.g. ``A1`` or ``A2:B7``.
+    :param runs: A list (possibly empty) of TextFormatRun objects
+    """
+    return _build_repeat_cell_request(worksheet, label, runs, 'textFormatRuns')
+
+
 def format_cell_ranges(worksheet, ranges):
     """Update a list of Cell object ranges of :class:`Cell` objects
     in the given ``Worksheet`` to have the accompanying ``CellFormat``.

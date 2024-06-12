@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .util import _build_repeat_cell_request, _fetch_with_updated_properties, _range_to_dimensionrange_object
-from .models import CellFormat
+from .util import _fetch_with_updated_properties, _range_to_dimensionrange_object
+from .models import CellFormat, TextFormatRun
 from .conditionals import DataValidationRule
 # These imports allow IDEs like PyCharm to verify the existence of these functions, 
 # even though we will rebind the names below with wrapped versions of the functions
@@ -17,7 +17,7 @@ from functools import wraps
 __all__ = (
     'get_default_format', 'get_effective_format', 'get_user_entered_format',
     'get_frozen_row_count', 'get_frozen_column_count', 'get_right_to_left',
-    'get_data_validation_rule',
+    'get_data_validation_rule', 'get_text_format_runs'
 ) + gspread_formatting.batch_update_requests.__all__
 
 
@@ -117,6 +117,33 @@ def get_user_entered_format(worksheet, label):
     data = resp['sheets'][0]['data'][0]
     props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('userEnteredFormat')
     return CellFormat.from_props(props) if props else None
+
+
+def get_text_format_runs(worksheet, label):
+    """Returns a list of TextFormatRun objects for the cell. List will be empty
+    if no TextFormatRuns exist for the cell.
+
+    :param worksheet: Worksheet object containing the cell whose format is desired.
+    :param label: String with cell label in common format, e.g. 'B1'.
+                  Letter case is ignored.
+
+    Example:
+
+    >>> get_text_format_runs(worksheet, 'A1')
+    [<TextFormatRun startIndex=0 textFormat=(bold=True)>, <TextFormatRun startIndex=10 textFormat=(italic=True)>]
+    >>> get_text_format_runs(worksheet, 'A2')
+    []
+    """
+    label = '%s!%s' % (worksheet.title, rowcol_to_a1(*a1_to_rowcol(label)))
+
+    resp = worksheet.spreadsheet.fetch_sheet_metadata({
+        'includeGridData': True,
+        'ranges': [label],
+        'fields': 'sheets.data.rowData.values.textFormatRuns'
+    })
+    data = resp['sheets'][0]['data'][0]
+    props = data.get('rowData', [{}])[0].get('values', [{}])[0].get('textFormatRuns', [])
+    return [TextFormatRun.from_props(item) for item in props]
 
 
 def get_frozen_row_count(worksheet):
