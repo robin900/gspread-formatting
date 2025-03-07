@@ -302,7 +302,7 @@ class TextFormat(CellFormatComponent):
 class TextFormatRun(FormattingComponent):
     _FIELDS = {'format': 'textFormat', 'startIndex': None}
 
-    def __init__(self, format, startIndex=0):
+    def __init__(self, format=None, startIndex=0):
         self.startIndex = startIndex
         self.format = format if format is not None else TextFormat()
 
