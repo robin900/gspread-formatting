@@ -710,6 +710,9 @@ class WorksheetTest(GspreadTest):
         fetched_runs = get_text_format_runs(self.sheet, 'A2')
         self.assertEqual([], fetched_runs)
 
+        # no args should succeed
+        TextFormatRun()
+
     def test_batch_updater_different_spreadsheet(self):
         batch = batch_updater(self.sheet.spreadsheet)
         other_spread = gspread.Spreadsheet.__new__(gspread.Spreadsheet)
