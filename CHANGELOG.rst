@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+v1.2.1 (2025-03-07)
+-------------------
+- Bump to v1.2.1. [Robin Thomas]
+- Test coverage for fix of #59. [Robin Thomas]
+- TextFormatRun.format now optional, has empty default (#60) [Robin
+  Thomas]
+
+  Fixes #59.
+
+
 v1.2.0 (2024-06-12)
 -------------------
 - Bump to v1.2.0. [Robin Thomas]
