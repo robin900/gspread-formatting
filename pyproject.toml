@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta" 
+
+[project]
+name = "gspread-formatting" 
+dynamic = ["version"]
+description = "Complete Google Sheets formatting support for gspread worksheets"
+readme = "README.rst"
+requires-python = ">=2.7"
+license = { file = "LICENSE" }
+keywords = ["spreadsheets", "google-spreadsheets", "formatting", "cell-format"]
+authors = [{ name = "Robin Thomas", email = "rthomas900@gmail.com" }]
+maintainers = [{ name = "Robin Thomas", email = "rthomas900@gmail.com" }]
+
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Office/Business :: Financial :: Spreadsheet",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 2.7",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.5",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+dependencies = ["gspread>=3.0.0"]
+
+[project.optional-dependencies]
+dev = [
+"gitchangelog",
+"Sphinx",
+"Sphinx-PyPI-upload3",
+"twine",
+"pytest",
+"oauth2client",
+"pandas",
+"gspread-dataframe",
+]
+
+test = [
+"pytest",
+"oauth2client",
+"pandas",
+"gspread-dataframe",
+"tox",
+"tox-pyenv"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/robin900/gspread-formatting"
+"Bug Reports" = "https://github.com/robin900/gspread-formatting/issues"
+"Source" = "https://github.com/robin900/gspread-formatting/"
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
