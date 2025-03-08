@@ -29,9 +29,9 @@ jobs:
         python -m build --sdist --wheel
     - name: Test with tox
       run: |
-        echo "$GSHEETS_CREDENTIALS" > creds.json
-        echo "$TESTS_CONFIG" > tests.config
-        tox
+        echo "${GSHEETS_CREDENTIALS}" > creds.json
+        echo "${TESTS_CONFIG}" > tests.config
+        tox -v
       env:
           GSHEETS_CREDENTIALS: ${{secrets.GSHEETS_CREDENTIALS}}
           TESTS_CONFIG: ${{secrets.TESTS_CONFIG}}
