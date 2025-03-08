@@ -49,6 +49,7 @@ SCOPE = [
     'https://spreadsheets.google.com/feeds',
     'https://www.googleapis.com/auth/drive.file'
 ]
+
 TEST_WORKSHEET_NAME = 'wksht_test'
 
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
