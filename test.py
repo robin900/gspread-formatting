@@ -50,7 +50,6 @@ SCOPE = [
     'https://www.googleapis.com/auth/drive.file'
 ]
 
-TEST_WORKSHEET_NAME = 'wksht_test'
 
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
 
@@ -85,6 +84,8 @@ def gen_value(prefix=None):
         return u'%s %s' % (prefix, gen_value())
     else:
         return unicode(uuid.uuid4())
+
+TEST_WORKSHEET_NAME = f'wksht_test{gen_value()}'
 
 
 class RangeConversionTest(unittest.TestCase):
