@@ -1,4 +1,0 @@
-nose
-oauth2client
-pandas
-gspread-dataframe
