@@ -24,9 +24,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install build tox tox-gh-actions
-    - name: Build with sdist and wheel
+    - name: Build sdist and wheel
       run: |
-        python -m build --sdist --wheel
+        python -m build 
     - name: Test with tox
       run: |
         echo "${GSHEETS_CREDENTIALS}" > creds.json

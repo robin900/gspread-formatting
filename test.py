@@ -49,6 +49,7 @@ SCOPE = [
     'https://spreadsheets.google.com/feeds',
     'https://www.googleapis.com/auth/drive.file'
 ]
+TEST_WORKSHEET_NAME = 'wksht_test'
 
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
 
@@ -185,7 +186,7 @@ class WorksheetTest(GspreadTest):
             }
         )
         try:
-            test_sheet = cls.spreadsheet.worksheet('wksht_test')
+            test_sheet = cls.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
             if test_sheet:
                 # somehow left over from interrupted test, remove.
                 cls.spreadsheet.del_worksheet(test_sheet)
@@ -197,16 +198,22 @@ class WorksheetTest(GspreadTest):
         if self.__class__.spreadsheet is None:
             self.__class__.setUpClass()
         try:
-            test_sheet = self.spreadsheet.worksheet('wksht_test')
+            test_sheet = self.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
             if test_sheet:
                 # somehow left over from interrupted test, remove.
                 self.spreadsheet.del_worksheet(test_sheet)
         except gspread.exceptions.WorksheetNotFound:
             pass # expected
-        self.sheet = self.spreadsheet.add_worksheet('wksht_test', 20, 20)
+        self.sheet = self.spreadsheet.add_worksheet(TEST_WORKSHEET_NAME, 20, 20)
 
     def tearDown(self):
-        self.spreadsheet.del_worksheet(self.sheet)
+        try:
+            test_sheet = self.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
+            if test_sheet:
+                # somehow left over from interrupted test, remove.
+                self.spreadsheet.del_worksheet(test_sheet)
+        except gspread.exceptions.WorksheetNotFound:
+            pass
 
     def test_some_format_constructors(self):
         f = numberFormat('TEXT', '###0')
