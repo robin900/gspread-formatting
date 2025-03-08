@@ -210,10 +210,11 @@ class WorksheetTest(GspreadTest):
         try:
             test_sheet = self.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
             if test_sheet:
-                # somehow left over from interrupted test, remove.
                 self.spreadsheet.del_worksheet(test_sheet)
         except gspread.exceptions.WorksheetNotFound:
+            # it's ok if the worksheet is absent
             pass
+        self.sheet = None
 
     def test_some_format_constructors(self):
         f = numberFormat('TEXT', '###0')
