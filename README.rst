@@ -4,6 +4,9 @@ gspread-formatting
 .. image:: https://badge.fury.io/py/gspread-formatting.svg
     :target: https://badge.fury.io/py/gspread-formatting
 
+.. image:: https://github.com/robin900/gspread-formatting/actions/workflows/python-package.yml/badge.svg?branch=master
+    :target: https://github.com/robin900/gspread-formatting/actions/workflows/python-package.yml
+
 .. image:: https://img.shields.io/pypi/dm/gspread-formatting.svg
     :target: https://pypi.org/project/gspread-formatting
 
@@ -265,7 +268,8 @@ Installation
 Requirements
 ~~~~~~~~~~~~
 
-* Python 2.7, 3.x; PyPy and PyPy3
+* Python 3.x, PyPy and PyPy3
+* Python 2.7 support for releases prior to 2.0.0
 * gspread >= 3.0.0
 
 From PyPI
