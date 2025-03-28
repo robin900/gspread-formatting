@@ -284,6 +284,10 @@ class WorksheetTest(GspreadTest):
         self.assertEqual(new_fmt.borders.bottom.style, eff_fmt.borders.bottom.style)
         self.assertEqual(new_fmt.padding.bottom, eff_fmt.padding.bottom)
 
+    def test_frozen_rows_cols_bad_args(self):
+        with self.assertRaises(ValueError):
+            set_frozen(self.sheet)
+
     def test_frozen_rows_cols(self):
         set_frozen(self.sheet, rows=1, cols=1)
         fresh = self.sheet.spreadsheet.fetch_sheet_metadata({'includeGridData': True})
