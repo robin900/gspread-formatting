@@ -7,7 +7,7 @@ name = "gspread-formatting"
 dynamic = ["version"]
 description = "Complete Google Sheets formatting support for gspread worksheets"
 readme = "README.rst"
-requires-python = ">=2.7"
+requires-python = ">=3.0"
 license = { file = "LICENSE" }
 keywords = ["spreadsheets", "google-spreadsheets", "formatting", "cell-format"]
 authors = [{ name = "Robin Thomas", email = "rthomas900@gmail.com" }]
