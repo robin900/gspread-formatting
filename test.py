@@ -50,6 +50,7 @@ SCOPE = [
     'https://www.googleapis.com/auth/drive.file'
 ]
 
+
 I18N_STR = u'Iñtërnâtiônàlizætiøn'  # .encode('utf8')
 
 
@@ -83,6 +84,8 @@ def gen_value(prefix=None):
         return u'%s %s' % (prefix, gen_value())
     else:
         return unicode(uuid.uuid4())
+
+TEST_WORKSHEET_NAME = f'wksht_test{gen_value()}'
 
 
 class RangeConversionTest(unittest.TestCase):
@@ -185,7 +188,7 @@ class WorksheetTest(GspreadTest):
             }
         )
         try:
-            test_sheet = cls.spreadsheet.worksheet('wksht_test')
+            test_sheet = cls.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
             if test_sheet:
                 # somehow left over from interrupted test, remove.
                 cls.spreadsheet.del_worksheet(test_sheet)
@@ -197,16 +200,23 @@ class WorksheetTest(GspreadTest):
         if self.__class__.spreadsheet is None:
             self.__class__.setUpClass()
         try:
-            test_sheet = self.spreadsheet.worksheet('wksht_test')
+            test_sheet = self.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
             if test_sheet:
                 # somehow left over from interrupted test, remove.
                 self.spreadsheet.del_worksheet(test_sheet)
         except gspread.exceptions.WorksheetNotFound:
             pass # expected
-        self.sheet = self.spreadsheet.add_worksheet('wksht_test', 20, 20)
+        self.sheet = self.spreadsheet.add_worksheet(TEST_WORKSHEET_NAME, 20, 20)
 
     def tearDown(self):
-        self.spreadsheet.del_worksheet(self.sheet)
+        try:
+            test_sheet = self.spreadsheet.worksheet(TEST_WORKSHEET_NAME)
+            if test_sheet:
+                self.spreadsheet.del_worksheet(test_sheet)
+        except gspread.exceptions.WorksheetNotFound:
+            # it's ok if the worksheet is absent
+            pass
+        self.sheet = None
 
     def test_some_format_constructors(self):
         f = numberFormat('TEXT', '###0')
@@ -273,6 +283,10 @@ class WorksheetTest(GspreadTest):
         eff_fmt = get_effective_format(self.sheet, 'A1')
         self.assertEqual(new_fmt.borders.bottom.style, eff_fmt.borders.bottom.style)
         self.assertEqual(new_fmt.padding.bottom, eff_fmt.padding.bottom)
+
+    def test_frozen_rows_cols_bad_args(self):
+        with self.assertRaises(ValueError):
+            set_frozen(self.sheet)
 
     def test_frozen_rows_cols(self):
         set_frozen(self.sheet, rows=1, cols=1)
