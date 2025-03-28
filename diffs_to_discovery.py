@@ -12,6 +12,8 @@ schemas = j['schemas']
 
 classes = gspread_formatting.models._CLASSES
 
+BASE_TYPES = {'boolean', 'string', 'number', 'integer'}
+
 def resolve_schema_property(sch_prop):
     if '$ref' in sch_prop:
         return resolve_schema_property(schemas[sch_prop['$ref']])
@@ -25,12 +27,13 @@ def resolve_class_field(fields, field_name):
         field_ref = field_name if (field_name in fields) else None
     if field_ref is None:
         return None
+    ref_class = classes.get(_underlower(field_ref))
+    if ref_class is not None:
+        return ref_class
+    if ref_class in BASE_TYPES:
+        return {'type': ref_class}
     else:
-        ref_class = classes.get(_underlower(field_ref))
-        if ref_class is None:
-            return { 'type': 'unknown' }
-        else:
-            return ref_class
+        return {'type': 'unknown'}
 
 def compare_property(name, sch_prop, cls_prop):
     errors = []
@@ -69,8 +72,9 @@ def compare_object(schema, cls):
             compare_property("%s.%s" % (schema_name, sch_propname), resolve_schema_property(sch_prop), cls_field) 
         )
 
-    return errors
+    # dedupe
+    return sorted({e for e in errors})
     
 
 diffs = compare_object(schemas['CellFormat'], classes['cellFormat'])
-pprint.pprint(diffs)
+pprint.pprint(diffs, width=120)
